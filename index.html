@@ -447,11 +447,6 @@ input,textarea,select{font-family:inherit}
         <div class="nav-item" data-page="performance"><span class="nav-icon">📈</span>Performance</div>
       </div>
       <div class="nav-group">
-        <div class="nav-group-label">Community</div>
-        <div class="nav-item" data-page="leaderboard"><span class="nav-icon">🏆</span>Leaderboard</div>
-        <div class="nav-item" data-page="friends"><span class="nav-icon">👥</span>Find Players</div>
-      </div>
-      <div class="nav-group">
         <div class="nav-group-label">Account</div>
         <div class="nav-item" data-page="settings"><span class="nav-icon">⚙️</span>Settings</div>
         <div class="nav-item" onclick="doLogout()"><span class="nav-icon">🚪</span>Sign Out</div>
@@ -885,10 +880,39 @@ const ROLE_COLORS = {
   Marksman:'var(--r-marksman)',Tank:'var(--r-tank)',Support:'var(--r-support)',
 };
 
-/* Hero portraits stored in localStorage keyed by hero name */
-function heroPortraitKey(name){ return 'nx_portrait_' + name.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
-function getPortrait(name){ return localStorage.getItem(heroPortraitKey(name)); }
-function setPortrait(name, dataUrl){ localStorage.setItem(heroPortraitKey(name), dataUrl); }
+/* ── HERO PORTRAITS via Supabase Storage ──
+   Portraits are stored in a public bucket called 'hero-portraits'.
+   We also cache them in localStorage so they load instantly on repeat visits.
+   Bucket must be created in Supabase → Storage → New bucket → name: hero-portraits → Public: ON
+*/
+const PORTRAIT_BUCKET = 'hero-portraits';
+const portraitCache = {}; // in-memory cache for this session
+
+function heroPortraitKey(name){ return name.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
+
+function getPortrait(name){
+  // 1. memory cache
+  if(portraitCache[name]) return portraitCache[name];
+  // 2. localStorage cache (set on upload)
+  const cached = localStorage.getItem('nx_p_'+heroPortraitKey(name));
+  if(cached){ portraitCache[name]=cached; return cached; }
+  // 3. Supabase public URL (sync, no await — renders on next paint via loadAllPortraits)
+  const url = sb.storage.from(PORTRAIT_BUCKET).getPublicUrl(heroPortraitKey(name)+'.jpg').data?.publicUrl;
+  return url||null;
+}
+
+async function setPortrait(name, file){
+  // Upload to Supabase Storage
+  const key = heroPortraitKey(name)+'.jpg';
+  const {error} = await sb.storage.from(PORTRAIT_BUCKET).upload(key, file, {upsert:true, contentType:file.type||'image/jpeg'});
+  if(error){ showToast('Upload failed: '+error.message,'error'); return false; }
+  // Get fresh public URL and cache it
+  const {data} = sb.storage.from(PORTRAIT_BUCKET).getPublicUrl(key);
+  const url = data?.publicUrl + '?t=' + Date.now(); // cache-bust
+  portraitCache[name] = url;
+  localStorage.setItem('nx_p_'+heroPortraitKey(name), url);
+  return true;
+}
 
 /* Active hero filter & view mode */
 let heroFilterRole = 'all';
@@ -968,19 +992,15 @@ function roleEmoji(role){
   return map[role]||'🎮';
 }
 
-function uploadPortrait(event, heroName){
+async function uploadPortrait(event, heroName){
   const file = event.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    setPortrait(heroName, e.target.result);
+  showToast('Uploading portrait…');
+  const ok = await setPortrait(heroName, file);
+  if(ok){
     renderHeroGrid();
-    // also re-render hero modal if open for same hero
-    if(document.getElementById('hero-modal').classList.contains('open')){
-      openHeroModal(heroName);
-    }
-    showToast(`Portrait updated for ${heroName}!`, 'success');
-  };
-  reader.readAsDataURL(file);
+    if(document.getElementById('hero-modal').classList.contains('open')) openHeroModal(heroName);
+    showToast(`Portrait updated for ${heroName}! 🖼`, 'success');
+  }
 }
 
 /* ── HERO DETAIL MODAL ── */
@@ -1031,7 +1051,18 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (session){ currentUser=session.user; await loadProfile(); await loadMatches(); hideLoading(); launchApp(); }
   else { hideLoading(); showAuth(); }
   sb.auth.onAuthStateChange(async(event,session)=>{
-    if(event==='SIGNED_IN'&&session){ currentUser=session.user; await loadProfile(); await loadMatches(); launchApp(); }
+    if(event==='SIGNED_IN'&&session){
+      currentUser=session.user;
+      // If this is a fresh signup, create the profile now that the session is ready
+      if(pendingSignup){
+        const p=pendingSignup; pendingSignup=null;
+        await sb.from('profiles').insert({
+          id:currentUser.id, username:p.username, name:p.name, role:p.role,
+          avatar:'⚡', rank:'Unranked', lp:0, joined:p.joined
+        });
+      }
+      await loadProfile(); await loadMatches(); launchApp();
+    }
     if(event==='SIGNED_OUT'){ currentUser=null; currentProfile=null; myMatches=[]; showAuth(); }
   });
 });
@@ -1060,6 +1091,9 @@ async function doLogin(){
   const {error}=await sb.auth.signInWithPassword({email,password:pass});
   if(error){err.textContent=error.message;err.classList.add('show');}
 }
+// Store pending signup data so onAuthStateChange can create the profile
+let pendingSignup = null;
+
 async function doSignup(){
   const username=document.getElementById('signup-user').value.trim();
   const name    =document.getElementById('signup-name').value.trim();
@@ -1069,12 +1103,16 @@ async function doSignup(){
   const err     =document.getElementById('signup-error'); err.classList.remove('show');
   if(!username||!name||!email||!pass){err.textContent='Please fill in all fields.';err.classList.add('show');return;}
   if(pass.length<6){err.textContent='Password must be at least 6 characters.';err.classList.add('show');return;}
-  const {data,error}=await sb.auth.signUp({email,password:pass});
-  if(error){err.textContent=error.message;err.classList.add('show');return;}
-  if(data.user){
-    const {error:pe}=await sb.from('profiles').insert({id:data.user.id,username,name,role,avatar:'⚡',rank:'Unranked',lp:0,joined:new Date().toLocaleDateString('en-GB',{month:'short',year:'numeric'})});
-    if(pe){err.textContent='Username may already be taken.';err.classList.add('show');await sb.auth.signOut();return;}
-  }
+
+  // Check username is not already taken before creating auth user
+  const {data:existing}=await sb.from('profiles').select('id').eq('username',username).maybeSingle();
+  if(existing){err.textContent='That username is already taken — please choose another.';err.classList.add('show');return;}
+
+  // Store signup details — profile will be created inside onAuthStateChange once session is confirmed
+  pendingSignup={username,name,role,joined:new Date().toLocaleDateString('en-GB',{month:'short',year:'numeric'})};
+
+  const {error}=await sb.auth.signUp({email,password:pass});
+  if(error){pendingSignup=null;err.textContent=error.message;err.classList.add('show');}
 }
 async function doLogout(){ await sb.auth.signOut(); navigate('overview'); }
 
