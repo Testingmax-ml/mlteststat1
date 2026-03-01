@@ -19,6 +19,39 @@
   --shadow-md:0 4px 16px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
   --shadow-lg:0 10px 40px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.06);
 }
+/* ── DARK MODE ── */
+html.dark{
+  --bg:#0f0f11;--surface:#18181b;--surface2:#1f1f23;--border:#2e2e35;--border2:#3a3a44;
+  --text:#f4f4f5;--text2:#a1a1aa;--text3:#71717a;
+  --accent:#3b82f6;--accent-h:#2563eb;--accent-l:#1e2d4a;
+  --win:#22c55e;--win-l:#052e16;--loss:#f87171;--loss-l:#2d1212;
+  --gold:#fbbf24;--gold-l:#2d1f05;
+  --shadow:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+  --shadow-md:0 4px 16px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.3);
+  --shadow-lg:0 10px 40px rgba(0,0,0,.5),0 4px 8px rgba(0,0,0,.4);
+}
+html.dark .champ-portrait-card.has-stats{border-color:#14532d}
+html.dark .wr-g{border-color:#14532d}
+html.dark .wr-w{border-color:#713f12}
+html.dark .wr-b{border-color:#7f1d1d}
+html.dark .tier-chall{background:#2d1f05;color:#fbbf24;border-color:#713f12}
+html.dark .tier-gm{background:#2d1505;color:#fb923c;border-color:#7c2d12}
+html.dark .tier-master{background:#1e1030;color:#a78bfa;border-color:#4c1d95}
+html.dark .tier-diamond{background:#1e2d4a;color:#60a5fa;border-color:#1e40af}
+html.dark .tier-plat{background:#042f2e;color:#34d399;border-color:#065f46}
+html.dark .tier-silver{background:var(--surface2);color:var(--text2);border-color:var(--border)}
+html.dark .rank-tag{background:#2d1f05;border-color:#713f12}
+html.dark .rank-tag-lp{color:#fcd34d}
+html.dark .role-Fighter{background:#3b0a0a;color:#fca5a5}
+html.dark .role-Assassin{background:#1e1030;color:#c4b5fd}
+html.dark .role-Mage{background:#1e2d4a;color:#93c5fd}
+html.dark .role-Marksman{background:#2d1f05;color:#fcd34d}
+html.dark .role-Tank{background:#1c1c22;color:#a1a1aa}
+html.dark .role-Support{background:#042f2e;color:#6ee7b7}
+html.dark .upload-zone:hover,html.dark .upload-zone.drag{background:#1e2d4a}
+html.dark .stat-table th{background:var(--surface2)}
+html.dark select.form-select option{background:var(--surface);color:var(--text)}
+body,html{transition:background .2s,color .2s}
 /* Role colours */
 :root{
   --r-fighter:#ef4444;--r-fighter-l:#fef2f2;
@@ -464,8 +497,7 @@ input,textarea,select{font-family:inherit}
     <header class="topbar">
       <div class="page-heading" id="pageHeading">Overview</div>
       <div class="topbar-right">
-        <div class="search-wrap"><span>🔍</span><input type="text" placeholder="Search players…" id="searchInput" onkeydown="if(event.key==='Enter')searchPlayers()"></div>
-        <button class="btn btn-primary" onclick="openLogGame()">+ Log Game</button>
+        <button class="btn btn-ghost btn-sm" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
       </div>
     </header>
 
@@ -704,11 +736,11 @@ input,textarea,select{font-family:inherit}
         </div>
         <div class="form-group" style="margin-top:16px"><label class="form-label">Notes (optional)</label><input class="form-input" type="text" id="f-notes" placeholder="e.g. great early game, team comeback"></div>
       </div>
-      <div style="margin-top:16px"><button class="btn btn-ghost btn-full" id="manual-toggle" onclick="toggleManual()">✏️ Fill in manually instead</button></div>
+      <div style="margin-top:16px"><button class="btn btn-ghost btn-full" id="manual-toggle" onclick="toggleManual()">✏️ Fill in manually</button></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeLogGame()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveGame()" id="save-game-btn" disabled>Save Game</button>
+      <button class="btn btn-primary" onclick="saveGame()" id="save-game-btn">Save Game</button>
     </div>
   </div>
 </div>
@@ -729,8 +761,19 @@ input,textarea,select{font-family:inherit}
 
 <script>
 /* ══════════════════════════════════════════
-   SUPABASE
+   DARK MODE
 ══════════════════════════════════════════ */
+function toggleDark(){
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('nx_dark', isDark ? '1' : '0');
+  document.getElementById('dark-toggle').textContent = isDark ? '☀️' : '🌙';
+}
+// Restore on page load
+(function(){
+  if(localStorage.getItem('nx_dark')==='1'){
+    document.documentElement.classList.add('dark');
+  }
+})();
 const SUPABASE_URL  = 'https://niootzzrvlrzrutugxso.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pb290enpydmxyenJ1dHVneHNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNDc0NTgsImV4cCI6MjA4NzcyMzQ1OH0.yjc7xq_wUAYpe_8qBUnVVU-5WfJCUHS9xHMdDLZbOTw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1073,7 +1116,14 @@ function buildHeroDatalist(){
 }
 function hideLoading(){ document.getElementById('loading-screen').style.display='none'; }
 function showAuth(){ document.getElementById('auth-screen').style.display='flex'; document.getElementById('app').style.display='none'; }
-function launchApp(){ document.getElementById('auth-screen').style.display='none'; document.getElementById('app').style.display='flex'; updateSidebar(); refreshAllPages(); navigate('overview'); }
+function launchApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  // Sync dark toggle icon
+  const btn = document.getElementById('dark-toggle');
+  if(btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+  updateSidebar(); refreshAllPages(); navigate('overview');
+}
 
 /* ══════════════════════════════════════════
    AUTH
@@ -1131,9 +1181,15 @@ async function loadMatches(){
 }
 function updateSidebar(){
   if(!currentProfile) return;
-  document.getElementById('sidebar-avatar').textContent=currentProfile.avatar||'⚡';
-  document.getElementById('sidebar-name').textContent  =currentProfile.name||currentProfile.username;
-  document.getElementById('sidebar-meta').textContent  =(currentProfile.rank||'Unranked')+' · '+(currentProfile.role||'Fighter');
+  const av = currentProfile.avatar || '⚡';
+  const name = currentProfile.name || currentProfile.username || '—';
+  const rank = currentProfile.rank || 'Unranked';
+  const role = currentProfile.role || 'Fighter';
+  document.getElementById('sidebar-avatar').textContent = av;
+  document.getElementById('sidebar-name').textContent   = name;
+  document.getElementById('sidebar-meta').textContent   = rank + ' · ' + role;
+  // Also keep the u-av background consistent
+  document.getElementById('sidebar-avatar').style.background = 'linear-gradient(135deg,#bfdbfe,#60a5fa)';
 }
 
 /* ══════════════════════════════════════════
@@ -1378,7 +1434,7 @@ async function renderLeaderboard(){
    FIND PLAYERS
 ══════════════════════════════════════════ */
 async function searchPlayers(){
-  const q=(document.getElementById('friend-search')?.value||document.getElementById('searchInput')?.value||'').trim().toLowerCase();
+  const q=(document.getElementById('friend-search')?.value||'').trim().toLowerCase();
   if(!q) return;
   const {data:profiles}=await sb.from('profiles').select('*').ilike('username',`%${q}%`);
   const el=document.getElementById('friend-results');
@@ -1412,7 +1468,7 @@ async function saveSettings(){
   const updates={name:document.getElementById('set-name').value.trim()||currentProfile.name,role:document.getElementById('set-role').value,rank:document.getElementById('set-rank').value,lp:parseInt(document.getElementById('set-lp').value)||0,avatar:selAv?selAv.dataset.av:currentProfile.avatar};
   const {error}=await sb.from('profiles').update(updates).eq('id',currentUser.id);
   if(error){showToast('Failed to save.','error');return;}
-  currentProfile={...currentProfile,...updates};updateSidebar();renderOverview();showToast('Settings saved! ✓','success');
+  currentProfile={...currentProfile,...updates};updateSidebar();renderOverview();renderSettings();showToast('Settings saved! ✓','success');
 }
 async function clearMatchHistory(){
   if(!confirm('Delete all your match history? This cannot be undone.')) return;
@@ -1455,28 +1511,38 @@ function renderRoleChips(){
 /* ══════════════════════════════════════════
    LOG GAME MODAL
 ══════════════════════════════════════════ */
-let manualVisible=false;
-function openLogGame(){document.getElementById('log-modal').classList.add('open');resetLogForm();}
+let manualVisible = false;
+function openLogGame(){
+  document.getElementById('log-modal').classList.add('open');
+  resetLogForm();
+  // Show manual form immediately — no need to click an extra button
+  manualVisible = true;
+  document.getElementById('extracted-form').classList.add('show');
+  document.getElementById('manual-toggle').textContent = '↑ Hide form';
+}
 function closeLogGame(){document.getElementById('log-modal').classList.remove('open');}
 function resetLogForm(){
-  manualVisible=false;
+  manualVisible = false;
   document.getElementById('screenshot-preview').style.display='none';
   document.getElementById('ai-reading').classList.remove('show');
   document.getElementById('extracted-form').classList.remove('show');
   document.getElementById('extracted-note').style.display='none';
   document.getElementById('manual-toggle').style.display='';
-  document.getElementById('manual-toggle').textContent='✏️ Fill in manually instead';
-  document.getElementById('save-game-btn').disabled=true;
+  document.getElementById('manual-toggle').textContent='✏️ Fill in manually';
+  // Keep save button enabled so manual entry always works
+  document.getElementById('save-game-btn').disabled=false;
   ['f-champ','f-k','f-d','f-a','f-cs','f-dmg','f-dur','f-notes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-result').value='win';document.getElementById('f-role').value='Fighter';
+  document.getElementById('f-result').value='win';
+  document.getElementById('f-role').value='Fighter';
   document.getElementById('f-mode').value='Ranked';
   document.getElementById('screenshot-input').value='';
 }
 function toggleManual(){
-  manualVisible=!manualVisible;
-  document.getElementById('extracted-form').classList.toggle('show',manualVisible);
-  document.getElementById('manual-toggle').textContent=manualVisible?'↑ Hide manual form':'✏️ Fill in manually instead';
-  document.getElementById('save-game-btn').disabled=!manualVisible;
+  manualVisible = !manualVisible;
+  document.getElementById('extracted-form').classList.toggle('show', manualVisible);
+  document.getElementById('manual-toggle').textContent = manualVisible ? '↑ Hide form' : '✏️ Fill in manually';
+  // Save button is always enabled once the user has opted to fill manually
+  document.getElementById('save-game-btn').disabled = false;
 }
 async function handleScreenshot(input){
   const file=input.files[0];if(!file) return;
