@@ -221,9 +221,11 @@ input,textarea,select{font-family:inherit}
 .rank-tag-lp{font-size:11.5px;color:#92400e;font-family:'DM Mono',monospace}
 
 /* ── MATCH ROWS ── */
-.match{display:flex;align-items:center;gap:13px;padding:11px 20px;border-bottom:1px solid var(--border);transition:background .12s}
+.match{display:flex;align-items:center;gap:13px;padding:11px 20px;border-bottom:1px solid var(--border);transition:background .12s;position:relative}
 .match:last-child{border-bottom:none}
 .match:hover{background:var(--surface2)}
+.match-delete-quick{position:absolute;right:10px;top:50%;transform:translateY(-50%);opacity:0;background:var(--loss-l);border:1px solid #fecaca;color:var(--loss);border-radius:var(--r-sm);padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s;white-space:nowrap;z-index:2}
+.match:hover .match-delete-quick{opacity:1}
 .m-stripe{width:3px;border-radius:100px;align-self:stretch;flex-shrink:0}
 .match.win .m-stripe{background:var(--win)}
 .match.loss .m-stripe{background:var(--loss)}
@@ -339,23 +341,48 @@ input,textarea,select{font-family:inherit}
 .extracted-note{background:var(--win-l);border:1px solid #bbf7d0;border-radius:var(--r-sm);padding:10px 14px;font-size:12.5px;color:var(--win);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 
 /* ── MATCH DETAIL MODAL ── */
-.match-detail-screenshot{width:100%;max-height:220px;object-fit:cover;display:block;border-bottom:1px solid var(--border)}
-.match-detail-screenshot-placeholder{width:100%;height:120px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;position:relative;transition:background .15s}
-.match-detail-screenshot-placeholder:hover{background:var(--accent-l)}
+.match-detail-screenshot{width:100%;max-height:260px;object-fit:cover;display:block;border-bottom:1px solid var(--border)}
+.match-detail-screenshot-wrap{position:relative}
+.match-detail-screenshot-wrap .change-photo-btn{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;backdrop-filter:blur(6px);border:none;transition:background .15s;display:flex;align-items:center;gap:5px}
+.match-detail-screenshot-wrap .change-photo-btn:hover{background:rgba(0,0,0,.85)}
+.match-detail-screenshot-wrap .change-photo-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.match-detail-screenshot-placeholder{width:100%;height:130px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;position:relative;transition:all .2s}
+.match-detail-screenshot-placeholder:hover{background:var(--accent-l);border-color:var(--accent)}
+.match-detail-screenshot-placeholder label{position:absolute;inset:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
 .match-detail-screenshot-placeholder input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.match-detail-screenshot-placeholder .ph-icon{font-size:28px;opacity:.4}
-.match-detail-screenshot-placeholder .ph-text{font-size:12px;color:var(--text3);font-weight:500}
+.match-detail-screenshot-placeholder .ph-icon{font-size:30px;opacity:.45;pointer-events:none}
+.match-detail-screenshot-placeholder .ph-text{font-size:12px;color:var(--text3);font-weight:600;pointer-events:none}
+.match-detail-screenshot-placeholder .ph-sub{font-size:11px;color:var(--text3);opacity:.7;pointer-events:none}
 .match-detail-body{padding:20px 24px}
-.match-detail-hero-row{display:flex;align-items:center;gap:14px;margin-bottom:20px}
-.match-detail-icon{width:54px;height:54px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;flex-shrink:0}
+.match-detail-hero-row{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.match-detail-icon{width:58px;height:58px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden;flex-shrink:0;box-shadow:var(--shadow)}
 .match-detail-icon img{width:100%;height:100%;object-fit:cover}
+/* stat breakdown section */
+.md-stat-section{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.md-stat-section-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:12px}
+.md-stat-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.md-stat-row:last-child{margin-bottom:0}
+.md-stat-label{font-size:12.5px;color:var(--text2);min-width:80px;font-weight:500}
+.md-stat-bar-wrap{flex:1;height:5px;background:var(--border);border-radius:100px;overflow:hidden}
+.md-stat-bar-fill{height:100%;border-radius:100px;transition:width .5s ease}
+.md-stat-val{font-size:12px;font-family:'DM Mono',monospace;font-weight:600;min-width:44px;text-align:right;color:var(--text)}
+/* delete confirm inline */
+.md-delete-confirm{background:var(--loss-l);border:1px solid #fecaca;border-radius:var(--r-sm);padding:12px 16px;margin-top:12px;display:none}
+.md-delete-confirm.show{display:block}
+.md-delete-confirm p{font-size:13px;color:var(--loss);font-weight:600;margin-bottom:10px}
+.md-delete-confirm-btns{display:flex;gap:8px}
+/* upload progress */
+.md-upload-progress{display:none;margin-top:8px;background:var(--accent-l);border:1px solid #bfdbfe;border-radius:var(--r-sm);padding:10px 14px;align-items:center;gap:10px;font-size:12.5px;color:var(--accent);font-weight:500}
+.md-upload-progress.show{display:flex}
+.md-upload-spinner{width:14px;height:14px;border:2px solid #bfdbfe;border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 .match-detail-name{font-family:'Sora',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.4px}
-.match-detail-sub{font-size:12px;color:var(--text3);margin-top:2px}
-.match-detail-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.match-detail-sub{font-size:12px;color:var(--text3);margin-top:4px;display:flex;gap:4px;flex-wrap:wrap}
+.match-detail-date{font-size:11px;color:var(--text3);margin-top:4px}
+.match-detail-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0}
 .md-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 8px;text-align:center}
 .md-kpi-val{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.4px}
 .md-kpi-lbl{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-top:3px}
-.match-detail-notes{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--text2);margin-bottom:16px;font-style:italic}
+.match-detail-notes{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--text2);font-style:italic;display:flex;gap:8px;align-items:flex-start}
 .match-detail-delete{margin-top:12px}
 /* Make match rows clickable */
 .match{cursor:pointer}
@@ -1291,7 +1318,8 @@ function matchHTML(m){
       </div>
       <div class="m-kda">${m.k}/${m.d}/${m.a} · ${dmgStr} dmg${m.notes?' · <em style="color:var(--text3)">'+m.notes+'</em>':''}</div>
     </div>
-    <div class="m-right"><div class="m-ratio" style="color:${ratioColor(ratio)}">${ratio}</div><div class="m-dur">${durStr}</div></div>
+    <div class="m-right" style="margin-right:40px"><div class="m-ratio" style="color:${ratioColor(ratio)}">${ratio}</div><div class="m-dur">${durStr}</div></div>
+    <button class="match-delete-quick" onclick="event.stopPropagation();quickDeleteMatch('${m.id}')" title="Delete match">🗑</button>
   </div>`;
 }
 
@@ -1563,69 +1591,149 @@ function openMatchModal(matchId){
   const m = myMatches.find(x=>x.id===matchId); if(!m) return;
   const ratio = calcRatio(m);
   const durStr = m.dur?m.dur+'m':'—';
-  const dmgStr = m.dmg?(m.dmg>=1000?Math.round(m.dmg/1000)+'k':m.dmg):'—';
+  const dmgStr = m.dmg?(m.dmg>=1000?(m.dmg/1000).toFixed(1)+'k':m.dmg):'—';
   const portrait = getPortrait(m.champ);
   const iconHTML = portrait?`<img src="${portrait}" alt="${m.champ}" style="width:100%;height:100%;object-fit:cover">`:(()=>{const h=HEROES.find(x=>x.name===m.champ);return h?roleEmoji(h.roles[0]):'🎮';})();
   const date = m.created_at ? new Date(m.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
 
-  document.getElementById('match-modal-title').textContent = m.champ + ' — ' + (m.result==='win'?'Victory':'Defeat');
+  // Calculate stats relative to user's averages for context bars
+  const avgStats = calcStats(myMatches);
+  const maxDmg = Math.max(...myMatches.map(x=>x.dmg||0), 1);
+  const maxK = Math.max(...myMatches.map(x=>x.k||0), 1);
+  const maxA = Math.max(...myMatches.map(x=>x.a||0), 1);
 
-  document.getElementById('match-modal-body').innerHTML = `
-    ${m.screenshot_url
-      ? `<div style="position:relative">
-           <img src="${m.screenshot_url}" class="match-detail-screenshot" alt="Match screenshot">
-           <label style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;backdrop-filter:blur(4px)">
-             📷 Change photo<input type="file" accept="image/*" style="display:none" onchange="uploadMatchScreenshot(event,'${m.id}')">
-           </label>
-         </div>`
-      : `<div class="match-detail-screenshot-placeholder">
+  const kdaRatioNum = parseFloat(ratio);
+  const kdaBarW = Math.min(100, Math.round((kdaRatioNum / 10) * 100));
+  const dmgBarW = m.dmg ? Math.min(100, Math.round((m.dmg / maxDmg) * 100)) : 0;
+  const killBarW = m.k ? Math.min(100, Math.round((m.k / maxK) * 100)) : 0;
+  const assistBarW = m.a ? Math.min(100, Math.round((m.a / maxA) * 100)) : 0;
+
+  const isWin = m.result === 'win';
+  const accentColor = isWin ? 'var(--win)' : 'var(--loss)';
+
+  // Photo section
+  const photoSection = m.screenshot_url
+    ? `<div class="match-detail-screenshot-wrap">
+         <img src="${m.screenshot_url}" class="match-detail-screenshot" alt="Match screenshot">
+         <button class="change-photo-btn" title="Change photo">
+           📷 Change photo
+           <input type="file" accept="image/*" onchange="uploadMatchScreenshot(event,'${m.id}')">
+         </button>
+       </div>`
+    : `<div class="match-detail-screenshot-placeholder">
+         <label>
            <input type="file" accept="image/*" onchange="uploadMatchScreenshot(event,'${m.id}')">
            <div class="ph-icon">📸</div>
-           <div class="ph-text">Click to add a match screenshot</div>
-         </div>`
-    }
+           <div class="ph-text">Add a match screenshot</div>
+           <div class="ph-sub">PNG, JPG, WEBP — click or tap to upload</div>
+         </label>
+       </div>`;
+
+  document.getElementById('match-modal-title').innerHTML = `
+    <span style="display:inline-flex;align-items:center;gap:8px">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${accentColor};flex-shrink:0"></span>
+      ${m.champ} — ${isWin?'Victory':'Defeat'}
+    </span>`;
+
+  document.getElementById('match-modal-body').innerHTML = `
+    ${photoSection}
+    <div id="md-upload-progress" class="md-upload-progress">
+      <div class="md-upload-spinner"></div>Uploading screenshot…
+    </div>
     <div class="match-detail-body">
       <div class="match-detail-hero-row">
         <div class="match-detail-icon">${iconHTML}</div>
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="match-detail-name">${m.champ}</div>
           <div class="match-detail-sub">
-            <span class="badge ${m.result==='win'?'b-win':'b-loss'}" style="margin-right:4px">${m.result==='win'?'Victory':'Defeat'}</span>
-            <span class="badge b-gray" style="margin-right:4px">${m.role||'—'}</span>
+            <span class="badge ${isWin?'b-win':'b-loss'}">${isWin?'Victory 🏆':'Defeat 💀'}</span>
+            <span class="badge b-gray">${m.role||'—'}</span>
             <span class="badge b-blue">${m.mode||'Ranked'}</span>
           </div>
-          <div style="font-size:11px;color:var(--text3);margin-top:4px">${date}</div>
+          <div class="match-detail-date">🕐 ${date}</div>
         </div>
       </div>
+
       <div class="match-detail-kpis">
-        <div class="md-kpi"><div class="md-kpi-val" style="color:${ratioColor(ratio)}">${ratio}</div><div class="md-kpi-lbl">KDA Ratio</div></div>
-        <div class="md-kpi"><div class="md-kpi-val">${m.k}<span style="font-size:13px;color:var(--text3)">/${m.d}/${m.a}</span></div><div class="md-kpi-lbl">K / D / A</div></div>
-        <div class="md-kpi"><div class="md-kpi-val">${dmgStr}</div><div class="md-kpi-lbl">Damage</div></div>
-        <div class="md-kpi"><div class="md-kpi-val">${durStr}</div><div class="md-kpi-lbl">Duration</div></div>
+        <div class="md-kpi">
+          <div class="md-kpi-val" style="color:${parseFloat(ratio)>=5?'var(--win)':parseFloat(ratio)>=3?'var(--gold)':'var(--loss)'}">${ratio}</div>
+          <div class="md-kpi-lbl">KDA Ratio</div>
+        </div>
+        <div class="md-kpi">
+          <div class="md-kpi-val">${m.k}<span style="font-size:12px;color:var(--text3)">/${m.d}/${m.a}</span></div>
+          <div class="md-kpi-lbl">K / D / A</div>
+        </div>
+        <div class="md-kpi">
+          <div class="md-kpi-val">${dmgStr}</div>
+          <div class="md-kpi-lbl">Damage</div>
+        </div>
+        <div class="md-kpi">
+          <div class="md-kpi-val">${durStr}</div>
+          <div class="md-kpi-lbl">Duration</div>
+        </div>
       </div>
-      ${m.notes?`<div class="match-detail-notes">💬 ${m.notes}</div>`:''}
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
-        <button class="btn btn-danger btn-sm" onclick="deleteMatch('${m.id}')">🗑 Delete</button>
+
+      <div class="md-stat-section">
+        <div class="md-stat-section-title">Performance Breakdown</div>
+        <div class="md-stat-row">
+          <span class="md-stat-label">KDA Ratio</span>
+          <div class="md-stat-bar-wrap"><div class="md-stat-bar-fill" style="width:${kdaBarW}%;background:var(--accent)"></div></div>
+          <span class="md-stat-val">${ratio}</span>
+        </div>
+        <div class="md-stat-row">
+          <span class="md-stat-label">Kills</span>
+          <div class="md-stat-bar-wrap"><div class="md-stat-bar-fill" style="width:${killBarW}%;background:#f97316"></div></div>
+          <span class="md-stat-val">${m.k||0}</span>
+        </div>
+        <div class="md-stat-row">
+          <span class="md-stat-label">Assists</span>
+          <div class="md-stat-bar-wrap"><div class="md-stat-bar-fill" style="width:${assistBarW}%;background:var(--win)"></div></div>
+          <span class="md-stat-val">${m.a||0}</span>
+        </div>
+        ${m.dmg?`<div class="md-stat-row">
+          <span class="md-stat-label">Damage</span>
+          <div class="md-stat-bar-wrap"><div class="md-stat-bar-fill" style="width:${dmgBarW}%;background:var(--loss)"></div></div>
+          <span class="md-stat-val">${dmgStr}</span>
+        </div>`:''}
+        ${avgStats?`<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);display:flex;gap:16px;font-size:11px;color:var(--text3)">
+          <span>Avg KDA: <strong style="color:var(--text)">${avgStats.kda}</strong></span>
+          <span>Avg Dmg: <strong style="color:var(--text)">${avgStats.avgDmg>=1000?(avgStats.avgDmg/1000).toFixed(1)+'k':avgStats.avgDmg}</strong></span>
+          <span>Win Rate: <strong style="color:var(--text)">${avgStats.wr}%</strong></span>
+        </div>`:''}
+      </div>
+
+      ${m.notes?`<div class="match-detail-notes" style="margin-top:14px">💬 <span>${m.notes}</span></div>`:''}
+
+      <div style="display:flex;gap:8px;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);align-items:center">
+        <button class="btn btn-danger btn-sm" onclick="showDeleteConfirm('${m.id}')">🗑 Delete Match</button>
         <button class="btn btn-ghost btn-sm" onclick="closeMatchModal()">Close</button>
+      </div>
+      <div class="md-delete-confirm" id="md-delete-confirm">
+        <p>⚠️ Delete this match permanently? This cannot be undone.</p>
+        <div class="md-delete-confirm-btns">
+          <button class="btn btn-danger btn-sm" onclick="deleteMatch('${m.id}')">Yes, delete</button>
+          <button class="btn btn-ghost btn-sm" onclick="hideDeleteConfirm()">Cancel</button>
+        </div>
       </div>
     </div>`;
 
   document.getElementById('match-modal').classList.add('open');
 }
 function closeMatchModal(){ document.getElementById('match-modal').classList.remove('open'); }
+function showDeleteConfirm(id){ document.getElementById('md-delete-confirm').classList.add('show'); }
+function hideDeleteConfirm(){ document.getElementById('md-delete-confirm').classList.remove('show'); }
 
 async function uploadMatchScreenshot(event, matchId){
   const file = event.target.files[0]; if(!file) return;
-  showToast('Uploading screenshot…');
+  const progressEl = document.getElementById('md-upload-progress');
+  if(progressEl) progressEl.classList.add('show');
   const key = `match_${matchId}.jpg`;
   const {error} = await sb.storage.from('hero-portraits').upload(key, file, {upsert:true, contentType:file.type||'image/jpeg'});
-  if(error){ showToast('Upload failed: '+error.message,'error'); return; }
+  if(error){ if(progressEl) progressEl.classList.remove('show'); showToast('Upload failed: '+error.message,'error'); return; }
   const {data} = sb.storage.from('hero-portraits').getPublicUrl(key);
   const url = data?.publicUrl + '?t='+Date.now();
-  // Save URL to the match record
   const {error:ue} = await sb.from('matches').update({screenshot_url: url}).eq('id', matchId);
-  if(ue){ showToast('Saved file but could not update match record.','error'); return; }
-  // Update local cache
+  if(ue){ if(progressEl) progressEl.classList.remove('show'); showToast('Saved file but could not update match record.','error'); return; }
   const idx = myMatches.findIndex(m=>m.id===matchId);
   if(idx>=0) myMatches[idx].screenshot_url = url;
   closeMatchModal();
@@ -1635,11 +1743,18 @@ async function uploadMatchScreenshot(event, matchId){
 }
 
 async function deleteMatch(matchId){
-  if(!confirm('Delete this match? This cannot be undone.')) return;
   const {error} = await sb.from('matches').delete().eq('id', matchId);
   if(error){ showToast('Failed to delete: '+error.message,'error'); return; }
   myMatches = myMatches.filter(m=>m.id!==matchId);
   closeMatchModal();
+  refreshAllPages();
+  showToast('Match deleted.','success');
+}
+async function quickDeleteMatch(matchId){
+  if(!confirm('Delete this match? This cannot be undone.')) return;
+  const {error} = await sb.from('matches').delete().eq('id', matchId);
+  if(error){ showToast('Failed to delete: '+error.message,'error'); return; }
+  myMatches = myMatches.filter(m=>m.id!==matchId);
   refreshAllPages();
   showToast('Match deleted.','success');
 }
