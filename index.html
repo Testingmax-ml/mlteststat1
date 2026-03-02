@@ -1307,7 +1307,8 @@ function matchHTML(m){
   const portrait=getPortrait(m.champ);
   const iconHTML=portrait?`<img src="${portrait}" alt="${m.champ}">`:(()=>{const h=HEROES.find(x=>x.name===m.champ);return h?roleEmoji(h.roles[0]):'🎮';})();
   const hasScreenshot = m.screenshot_url ? `<img src="${m.screenshot_url}" style="width:36px;height:28px;object-fit:cover;border-radius:4px;border:1px solid var(--border);margin-left:4px;vertical-align:middle" title="Has screenshot">` : '';
-  return`<div class="match ${m.result}" onclick="openMatchModal('${m.id}')">
+  const mid = String(m.id);
+  return`<div class="match ${m.result} match-clickable" data-match-id="${mid}">
     <div class="m-stripe"></div>
     <div class="m-icon">${iconHTML}</div>
     <div class="m-info">
@@ -1319,9 +1320,19 @@ function matchHTML(m){
       <div class="m-kda">${m.k}/${m.d}/${m.a} · ${dmgStr} dmg${m.notes?' · <em style="color:var(--text3)">'+m.notes+'</em>':''}</div>
     </div>
     <div class="m-right" style="margin-right:40px"><div class="m-ratio" style="color:${ratioColor(ratio)}">${ratio}</div><div class="m-dur">${durStr}</div></div>
-    <button class="match-delete-quick" onclick="event.stopPropagation();quickDeleteMatch('${m.id}')" title="Delete match">🗑</button>
+    <button class="match-delete-quick match-del-btn" data-del-id="${mid}" title="Delete match">&#128465;</button>
   </div>`;
 }
+
+// Single delegated listener for all match rows (handles dynamic content)
+document.addEventListener('click', function(e){
+  // Quick delete button
+  const delBtn = e.target.closest('.match-del-btn');
+  if(delBtn){ e.stopPropagation(); quickDeleteMatch(delBtn.dataset.delId); return; }
+  // Match row click -> open modal
+  const row = e.target.closest('.match-clickable');
+  if(row && !e.target.closest('button') && !e.target.closest('a')){ openMatchModal(row.dataset.matchId); }
+});
 
 /* ══════════════════════════════════════════
    RENDER — OVERVIEW
@@ -1588,7 +1599,7 @@ function renderRoleChips(){
    MATCH DETAIL MODAL
 ══════════════════════════════════════════ */
 function openMatchModal(matchId){
-  const m = myMatches.find(x=>x.id===matchId); if(!m) return;
+  const m = myMatches.find(x=>String(x.id)===String(matchId)); if(!m) return;
   const ratio = calcRatio(m);
   const durStr = m.dur?m.dur+'m':'—';
   const dmgStr = m.dmg?(m.dmg>=1000?(m.dmg/1000).toFixed(1)+'k':m.dmg):'—';
@@ -1734,7 +1745,7 @@ async function uploadMatchScreenshot(event, matchId){
   const url = data?.publicUrl + '?t='+Date.now();
   const {error:ue} = await sb.from('matches').update({screenshot_url: url}).eq('id', matchId);
   if(ue){ if(progressEl) progressEl.classList.remove('show'); showToast('Saved file but could not update match record.','error'); return; }
-  const idx = myMatches.findIndex(m=>m.id===matchId);
+  const idx = myMatches.findIndex(m=>String(m.id)===String(matchId));
   if(idx>=0) myMatches[idx].screenshot_url = url;
   closeMatchModal();
   openMatchModal(matchId);
@@ -1745,7 +1756,7 @@ async function uploadMatchScreenshot(event, matchId){
 async function deleteMatch(matchId){
   const {error} = await sb.from('matches').delete().eq('id', matchId);
   if(error){ showToast('Failed to delete: '+error.message,'error'); return; }
-  myMatches = myMatches.filter(m=>m.id!==matchId);
+  myMatches = myMatches.filter(m=>String(m.id)!==String(matchId));
   closeMatchModal();
   refreshAllPages();
   showToast('Match deleted.','success');
@@ -1754,7 +1765,7 @@ async function quickDeleteMatch(matchId){
   if(!confirm('Delete this match? This cannot be undone.')) return;
   const {error} = await sb.from('matches').delete().eq('id', matchId);
   if(error){ showToast('Failed to delete: '+error.message,'error'); return; }
-  myMatches = myMatches.filter(m=>m.id!==matchId);
+  myMatches = myMatches.filter(m=>String(m.id)!==String(matchId));
   refreshAllPages();
   showToast('Match deleted.','success');
 }
