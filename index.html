@@ -206,18 +206,96 @@ input,textarea,select{font-family:inherit}
 .mini-bar{height:3px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:10px}
 .mini-fill{height:100%;border-radius:100px}
 
-/* ── PROFILE BAR ── */
-.profile-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;display:flex;align-items:center;gap:20px;box-shadow:var(--shadow);margin-bottom:20px;flex-wrap:wrap}
-.pa{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#93c5fd);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:3px solid var(--surface);box-shadow:0 0 0 2px var(--border2)}
-.pname{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.4px}
-.pmeta{font-size:12.5px;color:var(--text2);display:flex;gap:10px;margin-top:2px;flex-wrap:wrap}
-.pstats{display:flex;gap:1px;background:var(--border);border-radius:var(--r-sm);overflow:hidden;margin-left:auto}
-.pstat{background:var(--surface);padding:12px 18px;text-align:center;min-width:88px}
-.pstat-val{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.4px}
-.pstat-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
-.rank-tag{display:flex;align-items:center;gap:8px;background:var(--gold-l);border:1px solid #fde68a;border-radius:100px;padding:7px 16px;white-space:nowrap;flex-shrink:0}
-.rank-tag-name{font-size:13px;font-weight:700;color:var(--gold)}
-.rank-tag-lp{font-size:11.5px;color:#92400e;font-family:'DM Mono',monospace}
+/* ── OVERVIEW HERO BANNER ── */
+.ov-hero-banner{
+  position:relative;border-radius:var(--r);overflow:hidden;
+  background:linear-gradient(135deg,#1e2d4a 0%,#0f172a 100%);
+  margin-bottom:0;min-height:130px;display:flex;align-items:stretch;
+  border:1px solid var(--border);box-shadow:var(--shadow-md);
+}
+.ov-hero-banner .ov-banner-bg{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;display:block;
+  opacity:0;transition:opacity .4s ease;
+}
+.ov-hero-banner .ov-banner-bg.loaded{opacity:1}
+.ov-banner-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.35) 60%,rgba(0,0,0,.55) 100%);
+  z-index:1;
+}
+.ov-banner-content{
+  position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px;flex:1;gap:16px;flex-wrap:wrap;
+}
+.ov-banner-profile{display:flex;align-items:center;gap:14px}
+.ov-avatar{
+  width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;
+  border:2.5px solid rgba(255,255,255,.25);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08);
+}
+.ov-banner-info{min-width:0}
+.ov-name{
+  font-family:'Sora',sans-serif;font-size:20px;font-weight:800;
+  letter-spacing:-.4px;color:#fff;line-height:1;margin-bottom:4px;
+  text-shadow:0 1px 4px rgba(0,0,0,.5);
+}
+.ov-meta{font-size:12px;color:rgba(255,255,255,.65);font-weight:500}
+.ov-banner-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0}
+.ov-rank-pill{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(217,119,6,.18);border:1px solid rgba(251,191,36,.35);
+  border-radius:100px;padding:6px 14px;backdrop-filter:blur(8px);
+}
+.ov-rank-icon{font-size:16px}
+.ov-rank-name{font-size:13px;font-weight:700;color:#fcd34d}
+.ov-rank-lp{font-size:11px;color:rgba(252,211,77,.7);font-family:'DM Mono',monospace}
+/* Season countdown */
+.ov-season-countdown{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);
+  border-radius:100px;padding:5px 12px;backdrop-filter:blur(8px);
+}
+.ov-countdown-label{
+  font-size:9px;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(255,255,255,.5);
+}
+.ov-countdown-timer{
+  font-family:'DM Mono',monospace;font-size:12px;font-weight:600;
+  color:#fff;letter-spacing:.04em;
+}
+.ov-countdown-timer.urgent{color:#fca5a5}
+.ov-countdown-timer.soon{color:#fcd34d}
+
+/* ── STAT STRIP ── */
+.ov-stat-strip{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--shadow);
+  display:flex;align-items:stretch;overflow:hidden;
+  margin-top:12px;
+}
+.ov-stat-cell{
+  flex:1;padding:14px 8px;text-align:center;
+  transition:background .12s;cursor:default;
+}
+.ov-stat-cell:hover{background:var(--surface2)}
+.ov-stat-val{
+  font-family:'Sora',sans-serif;font-size:18px;font-weight:700;
+  letter-spacing:-.5px;line-height:1;margin-bottom:4px;
+}
+.ov-stat-lbl{
+  font-size:9.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--text3);
+}
+.ov-stat-sep{width:1px;background:var(--border);flex-shrink:0;align-self:stretch}
+
+/* ── OVERVIEW MAIN GRID ── */
+.ov-main-grid{display:grid;grid-template-columns:1fr 336px;gap:16px;margin-top:16px}
+.ov-match-count{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:500}
 
 /* ── MATCH ROWS ── */
 .match{display:flex;align-items:center;gap:13px;padding:11px 20px;border-bottom:1px solid var(--border);transition:background .12s;position:relative}
@@ -535,36 +613,113 @@ input,textarea,select{font-family:inherit}
 
     <!-- ═══ OVERVIEW ═══ -->
     <div class="page active" id="page-overview">
-      <div class="profile-bar">
-        <div class="pa" id="ov-avatar">⚡</div>
-        <div><div class="pname" id="ov-name">—</div><div class="pmeta"><span id="ov-role">—</span><span style="color:var(--border2)">·</span><span id="ov-joined">—</span></div></div>
-        <div class="pstats">
-          <div class="pstat"><div class="pstat-val" id="ov-wr">—</div><div class="pstat-lbl">Win Rate</div></div>
-          <div class="pstat"><div class="pstat-val" id="ov-kda">—</div><div class="pstat-lbl">KDA</div></div>
-          <div class="pstat"><div class="pstat-val" id="ov-games">—</div><div class="pstat-lbl">Games</div></div>
-          <div class="pstat"><div class="pstat-val" id="ov-dmg">—</div><div class="pstat-lbl">Avg Dmg</div></div>
-        </div>
-        <div class="rank-tag"><span style="font-size:20px">🏆</span><span class="rank-tag-name" id="ov-rank">Unranked</span><span class="rank-tag-lp" id="ov-lp">0 LP</span></div>
-      </div>
-      <div class="g4 mb20">
-        <div class="card card-hover"><div class="kpi"><div class="kpi-lbl">⚔️ Avg K/D/A</div><div class="kpi-val" id="kpi-kda">—</div><div class="kpi-change hi-dim2" id="kpi-kda-sub">Log games to see stats</div></div></div>
-        <div class="card card-hover"><div class="kpi"><div class="kpi-lbl">💥 Avg Damage</div><div class="kpi-val" id="kpi-dmg">—</div><div class="kpi-change hi-dim2" id="kpi-dmg-sub">No data yet</div><div class="mini-bar"><div class="mini-fill" id="kpi-dmg-bar" style="width:0;background:var(--accent)"></div></div></div></div>
-        <div class="card card-hover"><div class="kpi"><div class="kpi-lbl">⏱ Avg Duration</div><div class="kpi-val" id="kpi-dur">—</div><div class="kpi-change hi-dim2" id="kpi-dur-sub">No data yet</div></div></div>
-        <div class="card card-hover"><div class="kpi"><div class="kpi-lbl">🔥 Win Streak</div><div class="kpi-val" id="kpi-streak">—</div><div class="kpi-change hi-dim2" id="kpi-streak-sub">No data yet</div></div></div>
-      </div>
-      <div class="main-split">
-        <div class="flex-col">
-          <div class="card">
-            <div class="card-header"><div class="card-title">Recent Matches</div><button class="btn btn-ghost btn-sm" data-page="matches">View all →</button></div>
-            <div id="ov-matches-list"></div>
+
+      <!-- HERO BANNER (season countdown + profile) -->
+      <div class="ov-hero-banner" id="ov-hero-banner">
+        <div class="ov-banner-overlay"></div>
+        <div class="ov-banner-content">
+          <!-- Left: profile -->
+          <div class="ov-banner-profile">
+            <div class="ov-avatar" id="ov-avatar">⚡</div>
+            <div class="ov-banner-info">
+              <div class="ov-name" id="ov-name">—</div>
+              <div class="ov-meta" id="ov-meta">—</div>
+            </div>
           </div>
+          <!-- Right: rank + countdown -->
+          <div class="ov-banner-right">
+            <div class="ov-rank-pill" id="ov-rank-pill">
+              <span class="ov-rank-icon">🏆</span>
+              <span class="ov-rank-name" id="ov-rank">Unranked</span>
+              <span class="ov-rank-lp" id="ov-lp">0 pts</span>
+            </div>
+            <div class="ov-season-countdown" id="ov-countdown">
+              <span class="ov-countdown-label">S39 ENDS IN</span>
+              <span class="ov-countdown-timer" id="ov-countdown-timer">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAT STRIP: live numbers from match history -->
+      <div class="ov-stat-strip mb20">
+        <div class="ov-stat-cell">
+          <div class="ov-stat-val" id="ov-games">0</div>
+          <div class="ov-stat-lbl">Games</div>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat-cell">
+          <div class="ov-stat-val" id="ov-wr" style="color:var(--win)">—</div>
+          <div class="ov-stat-lbl">Win Rate</div>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat-cell">
+          <div class="ov-stat-val" id="ov-kda">—</div>
+          <div class="ov-stat-lbl">KDA</div>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat-cell">
+          <div class="ov-stat-val" id="ov-wins" style="color:var(--win)">0</div>
+          <div class="ov-stat-lbl">Wins</div>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat-cell">
+          <div class="ov-stat-val" id="ov-losses" style="color:var(--loss)">0</div>
+          <div class="ov-stat-lbl">Losses</div>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat-cell">
+          <div class="ov-stat-val" id="ov-streak">—</div>
+          <div class="ov-stat-lbl" id="ov-streak-lbl">Streak</div>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat-cell">
+          <div class="ov-stat-val" id="ov-dmg">—</div>
+          <div class="ov-stat-lbl">Avg Dmg</div>
+        </div>
+        <div class="ov-stat-sep"></div>
+        <div class="ov-stat-cell">
+          <div class="ov-stat-val" id="ov-dur">—</div>
+          <div class="ov-stat-lbl">Avg Dur</div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT GRID -->
+      <div class="ov-main-grid">
+
+        <!-- LEFT COLUMN -->
+        <div class="flex-col">
+
+          <!-- Recent Matches — feeds directly from myMatches -->
           <div class="card">
-            <div class="card-header"><div class="card-title">7-Day Performance</div><div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--win)"></div>Wins</div><div class="leg"><div class="leg-dot" style="background:#fca5a5"></div>Losses</div></div></div>
+            <div class="card-header">
+              <div class="card-title">Recent Matches</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="ov-match-count" id="ov-match-count">0 games</span>
+                <button class="btn btn-ghost btn-sm" data-page="matches">View all →</button>
+              </div>
+            </div>
+            <div id="ov-matches-list">
+              <div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">No games logged yet</div><div class="empty-sub">Click "+ Log Game" to add your first match</div><button class="btn btn-primary" onclick="openLogGame()">+ Log Game</button></div>
+            </div>
+          </div>
+
+          <!-- 7-Day Chart -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">7-Day Performance</div>
+              <div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--win)"></div>Wins</div><div class="leg"><div class="leg-dot" style="background:#fca5a5"></div>Losses</div></div>
+            </div>
             <div style="padding:20px"><div class="bar-chart" style="height:90px" id="ov-chart"></div></div>
             <div class="role-row" id="role-chips"></div>
           </div>
+
         </div>
+
+        <!-- RIGHT COLUMN -->
         <div class="flex-col">
+
+          <!-- Quick Log -->
           <div class="card">
             <div class="card-header"><div class="card-title">Quick Log</div></div>
             <div style="padding:20px;text-align:center">
@@ -574,10 +729,13 @@ input,textarea,select{font-family:inherit}
               <button class="btn btn-primary btn-full" onclick="openLogGame()">+ Log New Game</button>
             </div>
           </div>
+
+          <!-- Top Heroes -->
           <div class="card">
             <div class="card-header"><div class="card-title">Top Heroes</div><button class="btn btn-ghost btn-sm" data-page="champions">View all →</button></div>
             <div id="ov-champs"></div>
           </div>
+
         </div>
       </div>
     </div>
@@ -1323,48 +1481,130 @@ document.addEventListener('click', function(e){
 });
 
 /* ══════════════════════════════════════════
+   OVERVIEW — SEASON COUNTDOWN
+══════════════════════════════════════════ */
+const SEASON_END = new Date('2026-03-10T08:00:00Z');
+let countdownInterval = null;
+
+function formatCountdown(){
+  const now = new Date();
+  const diff = SEASON_END - now;
+  if(diff <= 0) return {text:'Season ended', cls:'urgent'};
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  const text = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`;
+  const cls = diff < 3600000 ? 'urgent' : diff < 86400000 ? 'soon' : '';
+  return {text, cls};
+}
+
+function startCountdown(){
+  const el = document.getElementById('ov-countdown-timer');
+  if(!el) return;
+  if(countdownInterval) clearInterval(countdownInterval);
+  const tick = () => {
+    const {text, cls} = formatCountdown();
+    el.textContent = text;
+    el.className = 'ov-countdown-timer' + (cls ? ' '+cls : '');
+  };
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
+/* ══════════════════════════════════════════
+   OVERVIEW — BANNER BACKGROUND
+   Store key 'overview_banner.jpg' in Supabase Storage bucket 'hero-portraits'
+══════════════════════════════════════════ */
+async function loadBannerBg(){
+  const banner = document.getElementById('ov-hero-banner');
+  if(!banner) return;
+  // Check localStorage cache first
+  const cached = localStorage.getItem('nx_banner_url');
+  if(cached){ applyBannerBg(banner, cached); return; }
+  // Fetch from Supabase storage
+  try {
+    const {data} = sb.storage.from(PORTRAIT_BUCKET).getPublicUrl('overview_banner.jpg');
+    if(data?.publicUrl) {
+      const url = data.publicUrl;
+      localStorage.setItem('nx_banner_url', url);
+      applyBannerBg(banner, url);
+    }
+  } catch(e){}
+}
+
+function applyBannerBg(banner, url){
+  let img = banner.querySelector('.ov-banner-bg');
+  if(!img){
+    img = document.createElement('img');
+    img.className = 'ov-banner-bg';
+    banner.insertBefore(img, banner.firstChild);
+  }
+  img.onload = () => img.classList.add('loaded');
+  img.onerror = () => {}; // silently ignore if no banner uploaded yet
+  img.src = url;
+}
+
+/* ══════════════════════════════════════════
    RENDER — OVERVIEW
+   All stats pulled directly from myMatches
 ══════════════════════════════════════════ */
 function renderOverview(){
   if(!currentProfile) return;
-  const stats=calcStats(myMatches);
-  document.getElementById('ov-avatar').textContent =currentProfile.avatar||'⚡';
-  document.getElementById('ov-name').textContent   =currentProfile.name||currentProfile.username;
-  document.getElementById('ov-role').textContent   =(currentProfile.role||'Fighter')+' Main';
-  document.getElementById('ov-joined').textContent ='Joined '+(currentProfile.joined||'—');
-  document.getElementById('ov-rank').textContent   =currentProfile.rank||'Unranked';
-  document.getElementById('ov-lp').textContent     =(currentProfile.lp||0)+' pts';
-  if(stats){
-    document.getElementById('ov-wr').textContent   =stats.wr+'%';
-    document.getElementById('ov-kda').textContent  =stats.kda;
-    document.getElementById('ov-games').textContent=stats.n;
-    const dmgK=stats.avgDmg>=1000?(stats.avgDmg/1000).toFixed(1)+'k':stats.avgDmg;
-    document.getElementById('ov-dmg').textContent  =dmgK;
-    document.getElementById('kpi-kda').innerHTML   =`${stats.avgK} <span class="hi-dim">/ ${stats.avgD} / ${stats.avgA}</span>`;
-    document.getElementById('kpi-kda-sub').textContent=stats.n+' games logged';
-    document.getElementById('kpi-kda-sub').className='kpi-change hi-blue';
-    document.getElementById('kpi-dmg').textContent=dmgK;
-    document.getElementById('kpi-dmg-sub').textContent='per game avg';
-    document.getElementById('kpi-dmg-bar').style.width=Math.min(100,Math.round(stats.avgDmg/500))+'%';
-    document.getElementById('kpi-dur').innerHTML=`${stats.avgDur}<span class="hi-dim">m</span>`;
-    document.getElementById('kpi-dur-sub').textContent='avg game length';
-    // Streak
-    const all=[...myMatches].reverse();
-    let streak=0,lastRes=all[0]?.result;
-    for(const m of all){if(m.result===lastRes)streak++;else break;}
-    document.getElementById('kpi-streak').textContent=streak;
-    document.getElementById('kpi-streak-sub').textContent=lastRes==='win'?'🔥 Win streak':lastRes==='loss'?'❄️ Loss streak':'—';
-    document.getElementById('kpi-streak-sub').className='kpi-change '+(lastRes==='win'?'hi-green':'hi-red');
-  } else {
-    ['ov-wr','ov-kda','ov-games','ov-dmg'].forEach(id=>document.getElementById(id).textContent='—');
-    document.getElementById('kpi-streak').textContent='—';
-  }
-  const recent=[...myMatches].reverse().slice(0,10);
-  document.getElementById('ov-matches-list').innerHTML=recent.length?recent.map(matchHTML).join(''):
-    `<div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">No games logged yet</div><div class="empty-sub">Click "+ Log Game" to add your first match</div><button class="btn btn-primary" onclick="openLogGame()">+ Log Game</button></div>`;
+
+  // ── Profile section ──
+  document.getElementById('ov-avatar').textContent = currentProfile.avatar || '⚡';
+  document.getElementById('ov-name').textContent   = currentProfile.name || currentProfile.username || '—';
+  document.getElementById('ov-meta').textContent   = (currentProfile.role||'Fighter') + ' Main · Joined ' + (currentProfile.joined||'—');
+  document.getElementById('ov-rank').textContent   = currentProfile.rank || 'Unranked';
+  document.getElementById('ov-lp').textContent     = (currentProfile.lp||0) + ' pts';
+
+  // Start the live countdown (only starts interval once)
+  startCountdown();
+
+  // ── Stats computed straight from myMatches ──
+  const total   = myMatches.length;
+  const wins    = myMatches.filter(m=>m.result==='win').length;
+  const losses  = total - wins;
+  const wr      = total ? Math.round((wins/total)*100) : null;
+  const totalK  = myMatches.reduce((s,m)=>s+(m.k||0),0);
+  const totalD  = myMatches.reduce((s,m)=>s+(m.d||0),0);
+  const totalA  = myMatches.reduce((s,m)=>s+(m.a||0),0);
+  const kda     = total ? (totalD===0 ? 'Perfect' : ((totalK+totalA)/totalD).toFixed(2)) : null;
+  const avgDmg  = total ? Math.round(myMatches.reduce((s,m)=>s+(m.dmg||0),0)/total) : null;
+  const avgDur  = total ? Math.round(myMatches.reduce((s,m)=>s+(m.dur||0),0)/total) : null;
+
+  // Current streak
+  const rev = [...myMatches].reverse();
+  let streak = 0, streakType = '';
+  if(rev.length){ streakType = rev[0].result; for(const m of rev){ if(m.result===streakType) streak++; else break; } }
+
+  // ── Stat strip ──
+  document.getElementById('ov-games').textContent   = total || '0';
+  document.getElementById('ov-wr').textContent      = wr !== null ? wr+'%' : '—';
+  document.getElementById('ov-wr').style.color      = wr === null ? 'var(--text)' : wr>=50 ? 'var(--win)' : 'var(--loss)';
+  document.getElementById('ov-kda').textContent     = kda || '—';
+  document.getElementById('ov-wins').textContent    = wins;
+  document.getElementById('ov-losses').textContent  = losses;
+  document.getElementById('ov-streak').textContent  = streak || '—';
+  document.getElementById('ov-streak').style.color  = streakType==='win' ? 'var(--win)' : streakType==='loss' ? 'var(--loss)' : 'var(--text)';
+  document.getElementById('ov-streak-lbl').textContent = streakType==='win' ? '🔥 Streak' : streakType==='loss' ? '❄️ Streak' : 'Streak';
+  document.getElementById('ov-dmg').textContent     = avgDmg ? (avgDmg>=1000?(avgDmg/1000).toFixed(1)+'k':avgDmg) : '—';
+  document.getElementById('ov-dur').textContent     = avgDur ? avgDur+'m' : '—';
+
+  // ── Match count label ──
+  document.getElementById('ov-match-count').textContent = total + ' game' + (total!==1?'s':'');
+
+  // ── Recent matches (last 8, newest first) — same data as Match History ──
+  const recent = [...myMatches].reverse().slice(0, 8);
+  document.getElementById('ov-matches-list').innerHTML = recent.length
+    ? recent.map(matchHTML).join('')
+    : `<div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">No games logged yet</div><div class="empty-sub">Click "+ Log Game" to add your first match</div><button class="btn btn-primary" onclick="openLogGame()">+ Log Game</button></div>`;
+
   renderTopHerosMini();
   renderWeekChart();
   renderRoleChips();
+  loadBannerBg();
 }
 
 function renderTopHerosMini(){
