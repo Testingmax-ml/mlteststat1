@@ -1154,10 +1154,12 @@ function showAuth(){ document.getElementById('auth-screen').style.display='flex'
 function launchApp(){
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('app').style.display='flex';
-  // Sync dark toggle icon
   const btn = document.getElementById('dark-toggle');
   if(btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-  updateSidebar(); refreshAllPages(); navigate('overview');
+  updateSidebar();
+  renderSettings(); // populate settings form once on load
+  refreshAllPages();
+  navigate('overview');
 }
 
 /* ══════════════════════════════════════════
@@ -1243,7 +1245,11 @@ function navigate(pageId){
   if(pageId==='matches')      renderMatchHistory();
   if(pageId==='performance')  renderPerformance();
   if(pageId==='leaderboard')  renderLeaderboard();
-  if(pageId==='settings')     renderSettings();
+  // Settings: only populate the form if it's currently blank (avoid wiping user edits)
+  if(pageId==='settings'){
+    const nameField = document.getElementById('set-name');
+    if(!nameField || !nameField.value) renderSettings();
+  }
 }
 document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.addEventListener('click',()=>navigate(n.dataset.page)));
 document.querySelectorAll('button[data-page]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
@@ -1535,8 +1541,10 @@ async function saveSettings(){
   };
   const {error}=await sb.from('profiles').update(updates).eq('id',currentUser.id);
   if(error){showToast('Failed to save: '+error.message,'error');return;}
-  currentProfile={...currentProfile,...updates};
-  updateSidebar();renderOverview();renderSettings();
+  // Re-fetch profile from DB to ensure local state matches server
+  await loadProfile();
+  updateSidebar();
+  refreshAllPages();
   showToast('Settings saved! ✓','success');
 }
 async function clearMatchHistory(){
@@ -1738,7 +1746,7 @@ async function uploadMatchScreenshot(event, matchId){
 async function deleteMatch(matchId){
   const {error} = await sb.from('matches').delete().eq('id', matchId);
   if(error){ showToast('Failed to delete: '+error.message,'error'); return; }
-  myMatches = myMatches.filter(m=>String(m.id)!==String(matchId));
+  await loadMatches();
   closeMatchModal();
   refreshAllPages();
   showToast('Match deleted.','success');
@@ -1747,7 +1755,7 @@ async function quickDeleteMatch(matchId){
   if(!confirm('Delete this match? This cannot be undone.')) return;
   const {error} = await sb.from('matches').delete().eq('id', matchId);
   if(error){ showToast('Failed to delete: '+error.message,'error'); return; }
-  myMatches = myMatches.filter(m=>String(m.id)!==String(matchId));
+  await loadMatches();
   refreshAllPages();
   showToast('Match deleted.','success');
 }
@@ -1782,9 +1790,10 @@ async function saveGame(){
     mode:document.getElementById('f-mode').value,
     notes:document.getElementById('f-notes').value.trim(),
   };
-  const {data,error}=await sb.from('matches').insert(newMatch).select().single();
+  const {error}=await sb.from('matches').insert(newMatch);
   if(error){showToast('Failed to save game: '+error.message,'error');return;}
-  myMatches.push(data);
+  // Re-fetch full match list from DB so all pages are in sync
+  await loadMatches();
   closeLogGame();
   refreshAllPages();
   showToast('Game logged! 🎮','success');
@@ -1822,7 +1831,6 @@ function refreshAllPages(){
   renderChampionPageStats();
   renderMatchHistory();
   renderPerformance();
-  renderSettings();
 }
 </script>
 </body>
