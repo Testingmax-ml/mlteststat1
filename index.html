@@ -48,7 +48,6 @@ html.dark .role-Mage{background:#1e2d4a;color:#93c5fd}
 html.dark .role-Marksman{background:#2d1f05;color:#fcd34d}
 html.dark .role-Tank{background:#1c1c22;color:#a1a1aa}
 html.dark .role-Support{background:#042f2e;color:#6ee7b7}
-html.dark .upload-zone:hover,html.dark .upload-zone.drag{background:#1e2d4a}
 html.dark .stat-table th{background:var(--surface2)}
 html.dark select.form-select option{background:var(--surface);color:var(--text)}
 body,html{transition:background .2s,color .2s}
@@ -324,21 +323,6 @@ input,textarea,select{font-family:inherit}
 .modal-body{padding:24px}
 .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
 
-/* ── UPLOAD ── */
-.upload-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);position:relative;margin-bottom:20px}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-l)}
-.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.upload-icon{font-size:36px;margin-bottom:10px}
-.upload-title{font-weight:600;font-size:14px;margin-bottom:4px}
-.upload-sub{font-size:12px;color:var(--text3)}
-.upload-preview{width:100%;border-radius:var(--r-sm);max-height:200px;object-fit:cover;display:none;margin-bottom:16px;border:1px solid var(--border)}
-.ai-reading{background:var(--accent-l);border:1px solid #bfdbfe;border-radius:var(--r-sm);padding:14px 16px;display:none;margin-bottom:16px}
-.ai-reading.show{display:flex;align-items:center;gap:12px}
-.ai-spinner{width:20px;height:20px;border:2px solid #bfdbfe;border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-.ai-reading-text{font-size:13px;color:var(--accent);font-weight:500}
-.extracted-form{display:none}
-.extracted-form.show{display:block}
-.extracted-note{background:var(--win-l);border:1px solid #bbf7d0;border-radius:var(--r-sm);padding:10px 14px;font-size:12.5px;color:var(--win);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 
 /* ── MATCH DETAIL MODAL ── */
 .match-detail-screenshot{width:100%;max-height:260px;object-fit:cover;display:block;border-bottom:1px solid var(--border)}
@@ -586,7 +570,7 @@ input,textarea,select{font-family:inherit}
             <div style="padding:20px;text-align:center">
               <div style="font-size:36px;margin-bottom:10px">🎮</div>
               <div style="font-weight:600;margin-bottom:6px">Just finished a game?</div>
-              <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Upload a screenshot and we'll read your stats automatically.</div>
+              <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Log your stats to track your progress over time.</div>
               <button class="btn btn-primary btn-full" onclick="openLogGame()">+ Log New Game</button>
             </div>
           </div>
@@ -759,46 +743,39 @@ input,textarea,select{font-family:inherit}
       <button class="modal-close" onclick="closeLogGame()">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Upload your end-of-game screenshot and our AI will read your stats — or fill in manually.</p>
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" accept="image/*" id="screenshot-input" onchange="handleScreenshot(this)">
-        <div class="upload-icon">📸</div>
-        <div class="upload-title">Drop screenshot here or click to upload</div>
-        <div class="upload-sub">PNG, JPG, WEBP supported</div>
+      <div class="form-group"><label class="form-label">Hero Name *</label>
+        <input class="form-input" type="text" id="f-champ" placeholder="e.g. Fanny" list="hero-datalist" autocomplete="off">
+        <datalist id="hero-datalist"></datalist>
       </div>
-      <img id="screenshot-preview" class="upload-preview" alt="Preview">
-      <div class="ai-reading" id="ai-reading"><div class="ai-spinner"></div><div class="ai-reading-text">AI is reading your screenshot…</div></div>
-      <div class="extracted-form" id="extracted-form">
-        <div class="extracted-note" id="extracted-note" style="display:none">✅ Stats extracted — please review and correct if needed.</div>
-        <div class="form-group"><label class="form-label">Hero Name *</label>
-          <input class="form-input" type="text" id="f-champ" placeholder="e.g. Fanny" list="hero-datalist">
-          <datalist id="hero-datalist"></datalist>
+      <div class="form-row-3">
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Kills *</label><input class="form-input" type="number" id="f-k" min="0" placeholder="0"></div>
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Deaths *</label><input class="form-input" type="number" id="f-d" min="0" placeholder="0"></div>
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Assists *</label><input class="form-input" type="number" id="f-a" min="0" placeholder="0"></div>
+      </div>
+      <div class="form-row" style="margin-top:16px">
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Damage Dealt</label><input class="form-input" type="number" id="f-dmg" min="0" placeholder="e.g. 38000"></div>
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Duration (mins)</label><input class="form-input" type="number" id="f-dur" min="1" placeholder="e.g. 15"></div>
+      </div>
+      <div class="form-row" style="margin-top:16px">
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Role</label>
+          <select class="form-select" id="f-role"><option>Fighter</option><option>Assassin</option><option>Mage</option><option>Marksman</option><option>Tank</option><option>Support</option></select>
         </div>
-        <div class="form-row-3">
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Kills *</label><input class="form-input" type="number" id="f-k" min="0" placeholder="0"></div>
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Deaths *</label><input class="form-input" type="number" id="f-d" min="0" placeholder="0"></div>
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Assists *</label><input class="form-input" type="number" id="f-a" min="0" placeholder="0"></div>
-        </div>
-        <div class="form-row" style="margin-top:16px">
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Damage Dealt</label><input class="form-input" type="number" id="f-dmg" min="0" placeholder="e.g. 38000"></div>
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Duration (mins)</label><input class="form-input" type="number" id="f-dur" min="1" placeholder="e.g. 15"></div>
-        </div>
-        <div class="form-row" style="margin-top:16px">
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Role</label>
-            <select class="form-select" id="f-role"><option>Fighter</option><option>Assassin</option><option>Mage</option><option>Marksman</option><option>Tank</option><option>Support</option></select>
-          </div>
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Result *</label><select class="form-select" id="f-result"><option value="win">Victory 🏆</option><option value="loss">Defeat 💀</option></select></div>
-        </div>
-        <div class="form-row" style="margin-top:16px">
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Mode</label><select class="form-select" id="f-mode"><option>Ranked</option><option>Classic</option><option>Brawl</option><option>Custom</option></select></div>
-          <div class="form-group" style="margin-bottom:0"><label class="form-label">Notes (optional)</label><input class="form-input" type="text" id="f-notes" placeholder="e.g. great early game"></div>
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Result *</label>
+          <select class="form-select" id="f-result"><option value="win">Victory 🏆</option><option value="loss">Defeat 💀</option></select>
         </div>
       </div>
-      <div style="margin-top:16px"><button class="btn btn-ghost btn-full" id="manual-toggle" onclick="toggleManual()">✏️ Fill in manually</button></div>
+      <div class="form-row" style="margin-top:16px">
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Mode</label>
+          <select class="form-select" id="f-mode"><option>Ranked</option><option>Classic</option><option>Brawl</option><option>Custom</option></select>
+        </div>
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Notes (optional)</label>
+          <input class="form-input" type="text" id="f-notes" placeholder="e.g. great early game">
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeLogGame()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveGame()" id="save-game-btn">Save Game</button>
+      <button class="btn btn-primary" onclick="saveGame()">Save Game</button>
     </div>
   </div>
 </div>
@@ -1260,8 +1237,13 @@ function navigate(pageId){
   if(t){t.classList.add('active');t.style.animation='none';requestAnimationFrame(()=>{t.style.animation=''});}
   document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page===pageId));
   document.getElementById('pageHeading').textContent=PAGE_LABELS[pageId]||pageId;
-  if(pageId==='champions') renderHeroGrid();
-  if(pageId==='leaderboard') renderLeaderboard();
+  // Re-render whichever page we land on so it always shows fresh data
+  if(pageId==='overview')     renderOverview();
+  if(pageId==='champions')    { renderChampionPageStats(); renderHeroGrid(); }
+  if(pageId==='matches')      renderMatchHistory();
+  if(pageId==='performance')  renderPerformance();
+  if(pageId==='leaderboard')  renderLeaderboard();
+  if(pageId==='settings')     renderSettings();
 }
 document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.addEventListener('click',()=>navigate(n.dataset.page)));
 document.querySelectorAll('button[data-page]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
@@ -1773,88 +1755,16 @@ async function quickDeleteMatch(matchId){
 /* ══════════════════════════════════════════
    LOG GAME MODAL
 ══════════════════════════════════════════ */
-let manualVisible = false;
 function openLogGame(){
   document.getElementById('log-modal').classList.add('open');
   resetLogForm();
-  // Show manual form immediately — no need to click an extra button
-  manualVisible = true;
-  document.getElementById('extracted-form').classList.add('show');
-  document.getElementById('manual-toggle').textContent = '↑ Hide form';
 }
-function closeLogGame(){document.getElementById('log-modal').classList.remove('open');}
+function closeLogGame(){ document.getElementById('log-modal').classList.remove('open'); }
 function resetLogForm(){
-  manualVisible = false;
-  document.getElementById('screenshot-preview').style.display='none';
-  document.getElementById('ai-reading').classList.remove('show');
-  document.getElementById('extracted-form').classList.remove('show');
-  document.getElementById('extracted-note').style.display='none';
-  document.getElementById('manual-toggle').style.display='';
-  document.getElementById('manual-toggle').textContent='✏️ Fill in manually';
-  // Keep save button enabled so manual entry always works
-  document.getElementById('save-game-btn').disabled=false;
   ['f-champ','f-k','f-d','f-a','f-dmg','f-dur','f-notes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-result').value='win';
   document.getElementById('f-role').value='Fighter';
   document.getElementById('f-mode').value='Ranked';
-  document.getElementById('screenshot-input').value='';
-}
-function toggleManual(){
-  manualVisible = !manualVisible;
-  document.getElementById('extracted-form').classList.toggle('show', manualVisible);
-  document.getElementById('manual-toggle').textContent = manualVisible ? '↑ Hide form' : '✏️ Fill in manually';
-  // Save button is always enabled once the user has opted to fill manually
-  document.getElementById('save-game-btn').disabled = false;
-}
-async function handleScreenshot(input){
-  const file=input.files[0];if(!file) return;
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    const preview=document.getElementById('screenshot-preview');
-    preview.src=e.target.result;preview.style.display='block';
-    const b64=e.target.result.split(',')[1];
-    document.getElementById('ai-reading').classList.add('show');
-    document.getElementById('manual-toggle').style.display='none';
-    try{
-      const stats=await readScreenshotWithAI(b64,file.type||'image/png');
-      populateForm(stats,true);
-    }catch(err){
-      document.getElementById('ai-reading').classList.remove('show');
-      showToast('Could not read screenshot — please fill in manually.','error');
-      toggleManual();
-    }
-  };
-  reader.readAsDataURL(file);
-}
-async function readScreenshotWithAI(base64,mediaType){
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,
-      messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
-        {type:'text',text:`Look at this Mobile Legends Bang Bang end-of-game screenshot and extract the player's stats. Return ONLY valid JSON:
-{"champion":"hero name","kills":0,"deaths":0,"assists":0,"damage":0,"duration_minutes":0,"result":"win or loss","role":"Fighter/Assassin/Mage/Marksman/Tank/Support"}
-Return ONLY the JSON.`}
-      ]}]})
-  });
-  if(!res.ok) throw new Error('API error');
-  const data=await res.json();
-  return JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim());
-}
-function populateForm(stats,fromAI){
-  document.getElementById('ai-reading').classList.remove('show');
-  document.getElementById('extracted-form').classList.add('show');
-  if(fromAI) document.getElementById('extracted-note').style.display='flex';
-  document.getElementById('manual-toggle').style.display='none';
-  if(stats.champion)          document.getElementById('f-champ').value=stats.champion;
-  if(stats.kills!=null)       document.getElementById('f-k').value=stats.kills;
-  if(stats.deaths!=null)      document.getElementById('f-d').value=stats.deaths;
-  if(stats.assists!=null)     document.getElementById('f-a').value=stats.assists;
-  if(stats.damage!=null)      document.getElementById('f-dmg').value=stats.damage;
-  if(stats.duration_minutes!=null) document.getElementById('f-dur').value=stats.duration_minutes;
-  if(stats.result)            document.getElementById('f-result').value=stats.result;
-  if(stats.role)              document.getElementById('f-role').value=stats.role;
-  document.getElementById('save-game-btn').disabled=false;
 }
 async function saveGame(){
   const champ=document.getElementById('f-champ').value.trim();
@@ -1867,12 +1777,17 @@ async function saveGame(){
     k,d,a,
     dmg:parseInt(document.getElementById('f-dmg').value)||0,
     dur:parseInt(document.getElementById('f-dur').value)||0,
-    role:document.getElementById('f-role').value,result:document.getElementById('f-result').value,
-    mode:document.getElementById('f-mode').value,notes:document.getElementById('f-notes').value.trim(),
+    role:document.getElementById('f-role').value,
+    result:document.getElementById('f-result').value,
+    mode:document.getElementById('f-mode').value,
+    notes:document.getElementById('f-notes').value.trim(),
   };
   const {data,error}=await sb.from('matches').insert(newMatch).select().single();
   if(error){showToast('Failed to save game: '+error.message,'error');return;}
-  myMatches.push(data);closeLogGame();refreshAllPages();showToast('Game logged! 🎮','success');
+  myMatches.push(data);
+  closeLogGame();
+  refreshAllPages();
+  showToast('Game logged! 🎮','success');
 }
 
 /* ══════════════════════════════════════════
@@ -1889,18 +1804,6 @@ function initTabs(groupId,onSelect){
 }
 initTabs('tabs-matches',(i,l)=>renderMatchHistory(l==='all'?'all':l==='wins'?'wins':'losses'));
 
-const zone=document.getElementById('upload-zone');
-if(zone){
-  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag')});
-  zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
-  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');
-    const file=e.dataTransfer.files[0];
-    if(file&&file.type.startsWith('image/')){
-      const input=document.getElementById('screenshot-input');
-      const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;handleScreenshot(input);
-    }
-  });
-}
 document.getElementById('log-modal').addEventListener('click',e=>{if(e.target===document.getElementById('log-modal'))closeLogGame();});
 document.getElementById('match-modal').addEventListener('click',e=>{if(e.target===document.getElementById('match-modal'))closeMatchModal();});
 document.getElementById('hero-modal').addEventListener('click',e=>{if(e.target===document.getElementById('hero-modal'))closeHeroModal();});
