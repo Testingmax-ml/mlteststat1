@@ -1281,50 +1281,44 @@ function closeHeroModal(){ document.getElementById('hero-modal').classList.remov
 /* ══════════════════════════════════════════
    BOOT
 ══════════════════════════════════════════ */
-let appLaunched = false; // guard — only boot once
-
-async function bootApp(user){
-  if(appLaunched) return;
-  appLaunched = true;
-  currentUser = user;
-  await loadProfile();
-  await loadMatches();
-  hideLoading();
-  launchApp();
-}
-
 window.addEventListener('DOMContentLoaded', async () => {
   buildHeroDatalist();
 
-  // onAuthStateChange is the single source of truth for session state
+  // Get the current session first — this is the ground truth on page load
+  const { data: { session } } = await sb.auth.getSession();
+
+  if(session){
+    currentUser = session.user;
+    await loadProfile();
+    await loadMatches();
+    hideLoading();
+    launchApp();
+  } else {
+    hideLoading();
+    showAuth();
+  }
+
+  // onAuthStateChange only handles login/logout AFTER initial load
   sb.auth.onAuthStateChange(async(event, session) => {
-    if(event === 'SIGNED_IN' && session){
-      // Handle fresh signup — create profile row first
-      if(pendingSignup && !appLaunched){
-        currentUser = session.user;
+    if(event === 'SIGNED_IN' && session && !currentUser){
+      // Only fires for new logins (currentUser is null = not already booted)
+      currentUser = session.user;
+      if(pendingSignup){
         const p = pendingSignup; pendingSignup = null;
         await sb.from('profiles').insert({
           id: currentUser.id, username: p.username, name: p.name, role: p.role,
           avatar: '⚡', rank: 'Unranked', lp: 0, joined: p.joined
         });
       }
-      await bootApp(session.user);
+      await loadProfile();
+      await loadMatches();
+      launchApp();
     }
     if(event === 'SIGNED_OUT'){
-      appLaunched = false;
       currentUser = null; currentProfile = null; myMatches = [];
       showAuth();
     }
   });
-
-  // Kick-start: check for an existing session immediately
-  const { data: { session } } = await sb.auth.getSession();
-  if(session){
-    await bootApp(session.user);
-  } else {
-    hideLoading();
-    showAuth();
-  }
 });
 
 function buildHeroDatalist(){
