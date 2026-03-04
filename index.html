@@ -1281,26 +1281,50 @@ function closeHeroModal(){ document.getElementById('hero-modal').classList.remov
 /* ══════════════════════════════════════════
    BOOT
 ══════════════════════════════════════════ */
+let appLaunched = false; // guard — only boot once
+
+async function bootApp(user){
+  if(appLaunched) return;
+  appLaunched = true;
+  currentUser = user;
+  await loadProfile();
+  await loadMatches();
+  hideLoading();
+  launchApp();
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   buildHeroDatalist();
-  const { data: { session } } = await sb.auth.getSession();
-  if (session){ currentUser=session.user; await loadProfile(); await loadMatches(); hideLoading(); launchApp(); }
-  else { hideLoading(); showAuth(); }
-  sb.auth.onAuthStateChange(async(event,session)=>{
-    if(event==='SIGNED_IN'&&session){
-      currentUser=session.user;
-      // If this is a fresh signup, create the profile now that the session is ready
-      if(pendingSignup){
-        const p=pendingSignup; pendingSignup=null;
+
+  // onAuthStateChange is the single source of truth for session state
+  sb.auth.onAuthStateChange(async(event, session) => {
+    if(event === 'SIGNED_IN' && session){
+      // Handle fresh signup — create profile row first
+      if(pendingSignup && !appLaunched){
+        currentUser = session.user;
+        const p = pendingSignup; pendingSignup = null;
         await sb.from('profiles').insert({
-          id:currentUser.id, username:p.username, name:p.name, role:p.role,
-          avatar:'⚡', rank:'Unranked', lp:0, joined:p.joined
+          id: currentUser.id, username: p.username, name: p.name, role: p.role,
+          avatar: '⚡', rank: 'Unranked', lp: 0, joined: p.joined
         });
       }
-      await loadProfile(); await loadMatches(); launchApp();
+      await bootApp(session.user);
     }
-    if(event==='SIGNED_OUT'){ currentUser=null; currentProfile=null; myMatches=[]; showAuth(); }
+    if(event === 'SIGNED_OUT'){
+      appLaunched = false;
+      currentUser = null; currentProfile = null; myMatches = [];
+      showAuth();
+    }
   });
+
+  // Kick-start: check for an existing session immediately
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){
+    await bootApp(session.user);
+  } else {
+    hideLoading();
+    showAuth();
+  }
 });
 
 function buildHeroDatalist(){
@@ -1315,9 +1339,8 @@ function launchApp(){
   const btn = document.getElementById('dark-toggle');
   if(btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
   updateSidebar();
-  renderSettings(); // populate settings form once on load
-  refreshAllPages();
-  navigate('overview');
+  renderSettings(); // populate settings form with profile data
+  navigate('overview'); // renders overview + wires up all pages on first visit
 }
 
 /* ══════════════════════════════════════════
@@ -1366,13 +1389,16 @@ async function doLogout(){ await sb.auth.signOut(); navigate('overview'); }
 ══════════════════════════════════════════ */
 async function loadProfile(){
   if(!currentUser) return;
-  const {data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-  currentProfile=data;
+  const {data, error} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(error){ console.error('loadProfile error:', error); return; }
+  currentProfile = data;
 }
 async function loadMatches(){
   if(!currentUser) return;
-  const {data}=await sb.from('matches').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:true});
-  myMatches=data||[];
+  const {data, error} = await sb.from('matches').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:true});
+  if(error){ console.error('loadMatches error:', error); return; }
+  myMatches = data || [];
+  console.log('loadMatches: loaded', myMatches.length, 'matches', myMatches.slice(0,2));
 }
 function updateSidebar(){
   if(!currentProfile) return;
@@ -1483,18 +1509,22 @@ document.addEventListener('click', function(e){
 /* ══════════════════════════════════════════
    OVERVIEW — SEASON COUNTDOWN
 ══════════════════════════════════════════ */
-const SEASON_END = new Date('2026-03-10T08:00:00Z');
+const SEASON_END = new Date(Date.UTC(2026, 2, 10, 8, 0, 0)); // March 10 2026 08:00 UTC
 let countdownInterval = null;
 
 function formatCountdown(){
-  const now = new Date();
-  const diff = SEASON_END - now;
+  const now = Date.now();
+  const diff = SEASON_END.getTime() - now;
   if(diff <= 0) return {text:'Season ended', cls:'urgent'};
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  const text = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`;
+  const totalSec = Math.floor(diff / 1000);
+  const d = Math.floor(totalSec / 86400);
+  const h = Math.floor((totalSec % 86400) / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const pad = n => String(n).padStart(2,'0');
+  const text = d > 0
+    ? `${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`
+    : `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
   const cls = diff < 3600000 ? 'urgent' : diff < 86400000 ? 'soon' : '';
   return {text, cls};
 }
@@ -1550,7 +1580,8 @@ function applyBannerBg(banner, url){
    All stats pulled directly from myMatches
 ══════════════════════════════════════════ */
 function renderOverview(){
-  if(!currentProfile) return;
+  if(!currentProfile){ console.warn('renderOverview: no currentProfile yet'); return; }
+  console.log('renderOverview: myMatches.length =', myMatches.length);
 
   // ── Profile section ──
   document.getElementById('ov-avatar').textContent = currentProfile.avatar || '⚡';
