@@ -614,26 +614,24 @@ input,textarea,select{font-family:inherit}
     <!-- ═══ OVERVIEW ═══ -->
     <div class="page active" id="page-overview">
 
-      <!-- HERO BANNER (season countdown + profile) -->
+      <!-- HERO BANNER: photo bg + profile + rank + season countdown -->
       <div class="ov-hero-banner" id="ov-hero-banner">
         <div class="ov-banner-overlay"></div>
         <div class="ov-banner-content">
-          <!-- Left: profile -->
           <div class="ov-banner-profile">
-            <div class="ov-avatar" id="ov-avatar">⚡</div>
-            <div class="ov-banner-info">
-              <div class="ov-name" id="ov-name">—</div>
-              <div class="ov-meta" id="ov-meta">—</div>
+            <div class="pa" id="ov-avatar">⚡</div>
+            <div>
+              <div class="pname" id="ov-name">—</div>
+              <div class="pmeta"><span id="ov-role">—</span><span style="color:rgba(255,255,255,.4)">·</span><span id="ov-joined">—</span></div>
             </div>
           </div>
-          <!-- Right: rank + countdown -->
           <div class="ov-banner-right">
-            <div class="ov-rank-pill" id="ov-rank-pill">
-              <span class="ov-rank-icon">🏆</span>
-              <span class="ov-rank-name" id="ov-rank">Unranked</span>
-              <span class="ov-rank-lp" id="ov-lp">0 pts</span>
+            <div class="rank-tag" style="background:rgba(217,119,6,.25);border-color:rgba(251,191,36,.4)">
+              <span style="font-size:18px">🏆</span>
+              <span class="rank-tag-name" id="ov-rank" style="color:#fcd34d">Unranked</span>
+              <span class="rank-tag-lp" id="ov-lp" style="color:rgba(252,211,77,.7)">0 pts</span>
             </div>
-            <div class="ov-season-countdown" id="ov-countdown">
+            <div class="ov-season-countdown">
               <span class="ov-countdown-label">S39 ENDS IN</span>
               <span class="ov-countdown-timer" id="ov-countdown-timer">—</span>
             </div>
@@ -641,85 +639,38 @@ input,textarea,select{font-family:inherit}
         </div>
       </div>
 
-      <!-- STAT STRIP: live numbers from match history -->
-      <div class="ov-stat-strip mb20">
-        <div class="ov-stat-cell">
-          <div class="ov-stat-val" id="ov-games">0</div>
-          <div class="ov-stat-lbl">Games</div>
-        </div>
-        <div class="ov-stat-sep"></div>
-        <div class="ov-stat-cell">
-          <div class="ov-stat-val" id="ov-wr" style="color:var(--win)">—</div>
-          <div class="ov-stat-lbl">Win Rate</div>
-        </div>
-        <div class="ov-stat-sep"></div>
-        <div class="ov-stat-cell">
-          <div class="ov-stat-val" id="ov-kda">—</div>
-          <div class="ov-stat-lbl">KDA</div>
-        </div>
-        <div class="ov-stat-sep"></div>
-        <div class="ov-stat-cell">
-          <div class="ov-stat-val" id="ov-wins" style="color:var(--win)">0</div>
-          <div class="ov-stat-lbl">Wins</div>
-        </div>
-        <div class="ov-stat-sep"></div>
-        <div class="ov-stat-cell">
-          <div class="ov-stat-val" id="ov-losses" style="color:var(--loss)">0</div>
-          <div class="ov-stat-lbl">Losses</div>
-        </div>
-        <div class="ov-stat-sep"></div>
-        <div class="ov-stat-cell">
-          <div class="ov-stat-val" id="ov-streak">—</div>
-          <div class="ov-stat-lbl" id="ov-streak-lbl">Streak</div>
-        </div>
-        <div class="ov-stat-sep"></div>
-        <div class="ov-stat-cell">
-          <div class="ov-stat-val" id="ov-dmg">—</div>
-          <div class="ov-stat-lbl">Avg Dmg</div>
-        </div>
-        <div class="ov-stat-sep"></div>
-        <div class="ov-stat-cell">
-          <div class="ov-stat-val" id="ov-dur">—</div>
-          <div class="ov-stat-lbl">Avg Dur</div>
+      <!-- ORIGINAL PROFILE STAT BAR (hidden visually, IDs kept for renderOverview) -->
+      <div class="profile-bar" style="display:none">
+        <div class="pstats">
+          <div class="pstat"><div class="pstat-val" id="ov-wr">—</div></div>
+          <div class="pstat"><div class="pstat-val" id="ov-kda">—</div></div>
+          <div class="pstat"><div class="pstat-val" id="ov-games">—</div></div>
+          <div class="pstat"><div class="pstat-val" id="ov-dmg">—</div></div>
         </div>
       </div>
 
-      <!-- MAIN CONTENT GRID -->
-      <div class="ov-main-grid">
+      <!-- KPI CARDS — same as original, renderOverview writes to these -->
+      <div class="g4 mb20">
+        <div class="card card-hover"><div class="kpi"><div class="kpi-lbl">⚔️ Avg K/D/A</div><div class="kpi-val" id="kpi-kda">—</div><div class="kpi-change hi-dim2" id="kpi-kda-sub">Log games to see stats</div></div></div>
+        <div class="card card-hover"><div class="kpi"><div class="kpi-lbl">💥 Avg Damage</div><div class="kpi-val" id="kpi-dmg">—</div><div class="kpi-change hi-dim2" id="kpi-dmg-sub">No data yet</div><div class="mini-bar"><div class="mini-fill" id="kpi-dmg-bar" style="width:0;background:var(--accent)"></div></div></div></div>
+        <div class="card card-hover"><div class="kpi"><div class="kpi-lbl">⏱ Avg Duration</div><div class="kpi-val" id="kpi-dur">—</div><div class="kpi-change hi-dim2" id="kpi-dur-sub">No data yet</div></div></div>
+        <div class="card card-hover"><div class="kpi"><div class="kpi-lbl">🔥 Win Streak</div><div class="kpi-val" id="kpi-streak">—</div><div class="kpi-change hi-dim2" id="kpi-streak-sub">No data yet</div></div></div>
+      </div>
 
-        <!-- LEFT COLUMN -->
+      <!-- MAIN SPLIT: recent matches + top heroes -->
+      <div class="main-split">
         <div class="flex-col">
-
-          <!-- Recent Matches — feeds directly from myMatches -->
           <div class="card">
-            <div class="card-header">
-              <div class="card-title">Recent Matches</div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span class="ov-match-count" id="ov-match-count">0 games</span>
-                <button class="btn btn-ghost btn-sm" data-page="matches">View all →</button>
-              </div>
-            </div>
-            <div id="ov-matches-list">
-              <div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">No games logged yet</div><div class="empty-sub">Click "+ Log Game" to add your first match</div><button class="btn btn-primary" onclick="openLogGame()">+ Log Game</button></div>
-            </div>
+            <div class="card-header"><div class="card-title">Recent Matches</div><button class="btn btn-ghost btn-sm" data-page="matches">View all →</button></div>
+            <div id="ov-matches-list"></div>
           </div>
-
-          <!-- 7-Day Chart -->
           <div class="card">
-            <div class="card-header">
-              <div class="card-title">7-Day Performance</div>
-              <div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--win)"></div>Wins</div><div class="leg"><div class="leg-dot" style="background:#fca5a5"></div>Losses</div></div>
-            </div>
+            <div class="card-header"><div class="card-title">7-Day Performance</div><div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--win)"></div>Wins</div><div class="leg"><div class="leg-dot" style="background:#fca5a5"></div>Losses</div></div></div>
             <div style="padding:20px"><div class="bar-chart" style="height:90px" id="ov-chart"></div></div>
             <div class="role-row" id="role-chips"></div>
           </div>
-
         </div>
-
-        <!-- RIGHT COLUMN -->
         <div class="flex-col">
-
-          <!-- Quick Log -->
           <div class="card">
             <div class="card-header"><div class="card-title">Quick Log</div></div>
             <div style="padding:20px;text-align:center">
@@ -729,13 +680,10 @@ input,textarea,select{font-family:inherit}
               <button class="btn btn-primary btn-full" onclick="openLogGame()">+ Log New Game</button>
             </div>
           </div>
-
-          <!-- Top Heroes -->
           <div class="card">
             <div class="card-header"><div class="card-title">Top Heroes</div><button class="btn btn-ghost btn-sm" data-page="champions">View all →</button></div>
             <div id="ov-champs"></div>
           </div>
-
         </div>
       </div>
     </div>
@@ -1579,48 +1527,51 @@ function applyBannerBg(banner, url){
 function paintOverview(){
   if(!currentProfile) return;
 
-  // Profile banner
-  document.getElementById('ov-avatar').textContent = currentProfile.avatar || '⚡';
-  document.getElementById('ov-name').textContent   = currentProfile.name || currentProfile.username || '—';
-  document.getElementById('ov-meta').textContent   = (currentProfile.role||'Fighter') + ' Main · Joined ' + (currentProfile.joined||'—');
-  document.getElementById('ov-rank').textContent   = currentProfile.rank || 'Unranked';
-  document.getElementById('ov-lp').textContent     = (currentProfile.lp||0) + ' pts';
+  // Profile banner — only write to IDs that exist in the HTML
+  const setEl = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+
+  setEl('ov-avatar', currentProfile.avatar || '⚡');
+  setEl('ov-name',   currentProfile.name || currentProfile.username || '—');
+  setEl('ov-role',   (currentProfile.role||'Fighter') + ' Main');
+  setEl('ov-joined', 'Joined ' + (currentProfile.joined||'—'));
+  setEl('ov-rank',   currentProfile.rank || 'Unranked');
+  setEl('ov-lp',     (currentProfile.lp||0) + ' pts');
   startCountdown();
 
-  // Stats from myMatches
-  const ms     = myMatches; // alias — same array reference
-  const total  = ms.length;
-  const wins   = ms.filter(m => m.result === 'win').length;
-  const losses = total - wins;
-  const wr     = total ? Math.round((wins / total) * 100) : null;
-  const totalK = ms.reduce((s,m) => s+(m.k||0), 0);
-  const totalD = ms.reduce((s,m) => s+(m.d||0), 0);
-  const totalA = ms.reduce((s,m) => s+(m.a||0), 0);
-  const kda    = total ? (totalD===0 ? 'Perfect' : ((totalK+totalA)/totalD).toFixed(2)) : null;
-  const avgDmg = total ? Math.round(ms.reduce((s,m) => s+(m.dmg||0), 0)/total) : null;
-  const avgDur = total ? Math.round(ms.reduce((s,m) => s+(m.dur||0), 0)/total) : null;
+  // Compute stats from myMatches
+  const stats = calcStats(myMatches);
+  const all   = [...myMatches].reverse();
 
-  // Streak (myMatches is oldest-first, so reverse for newest-first)
-  const rev = [...ms].reverse();
-  let streak=0, streakType='';
-  if(rev.length){ streakType=rev[0].result; for(const m of rev){ if(m.result===streakType) streak++; else break; } }
+  // KPI cards (always exist in HTML)
+  if(stats){
+    const dmgK = stats.avgDmg >= 1000 ? (stats.avgDmg/1000).toFixed(1)+'k' : stats.avgDmg;
+    setEl('ov-wr',    stats.wr + '%');
+    setEl('ov-kda',   stats.kda);
+    setEl('ov-games', stats.n);
+    setEl('ov-dmg',   dmgK);
+    const kpiKda = document.getElementById('kpi-kda');
+    if(kpiKda) kpiKda.innerHTML = `${stats.avgK} <span class="hi-dim">/ ${stats.avgD} / ${stats.avgA}</span>`;
+    setEl('kpi-kda-sub', stats.n + ' games logged');
+    const ksub = document.getElementById('kpi-kda-sub'); if(ksub) ksub.className = 'kpi-change hi-blue';
+    setEl('kpi-dmg', dmgK);
+    setEl('kpi-dmg-sub', 'per game avg');
+    const bar = document.getElementById('kpi-dmg-bar'); if(bar) bar.style.width = Math.min(100, Math.round(stats.avgDmg/500))+'%';
+    const dur = document.getElementById('kpi-dur'); if(dur) dur.innerHTML = `${stats.avgDur}<span class="hi-dim">m</span>`;
+    setEl('kpi-dur-sub', 'avg game length');
+    // Streak
+    let streak=0, lastRes=all[0]?.result;
+    for(const m of all){ if(m.result===lastRes) streak++; else break; }
+    setEl('kpi-streak', streak);
+    setEl('kpi-streak-sub', lastRes==='win'?'🔥 Win streak':lastRes==='loss'?'❄️ Loss streak':'—');
+    const ssub = document.getElementById('kpi-streak-sub');
+    if(ssub) ssub.className = 'kpi-change ' + (lastRes==='win'?'hi-green':'hi-red');
+  } else {
+    ['ov-wr','ov-kda','ov-games','ov-dmg'].forEach(id => setEl(id,'—'));
+    setEl('kpi-streak','—');
+  }
 
-  // Stat strip
-  document.getElementById('ov-games').textContent  = total;
-  document.getElementById('ov-wr').textContent     = wr!==null ? wr+'%' : '—';
-  document.getElementById('ov-wr').style.color     = wr===null ? 'var(--text)' : wr>=50 ? 'var(--win)' : 'var(--loss)';
-  document.getElementById('ov-kda').textContent    = kda || '—';
-  document.getElementById('ov-wins').textContent   = wins;
-  document.getElementById('ov-losses').textContent = losses;
-  document.getElementById('ov-streak').textContent = streak || '—';
-  document.getElementById('ov-streak').style.color = streakType==='win'?'var(--win)':streakType==='loss'?'var(--loss)':'var(--text)';
-  document.getElementById('ov-streak-lbl').textContent = streakType==='win'?'🔥 Streak':streakType==='loss'?'❄️ Streak':'Streak';
-  document.getElementById('ov-dmg').textContent    = avgDmg ? (avgDmg>=1000?(avgDmg/1000).toFixed(1)+'k':avgDmg) : '—';
-  document.getElementById('ov-dur').textContent    = avgDur ? avgDur+'m' : '—';
-
-  // Recent matches — newest first, max 10
-  document.getElementById('ov-match-count').textContent = total+' game'+(total!==1?'s':'');
-  const recent = rev.slice(0, 10);
+  // Recent matches list — newest first, max 10, uses same matchHTML as Match History
+  const recent = all.slice(0, 10);
   document.getElementById('ov-matches-list').innerHTML = recent.length
     ? recent.map(matchHTML).join('')
     : `<div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">No games logged yet</div><div class="empty-sub">Click "+ Log Game" to add your first match</div><button class="btn btn-primary" onclick="openLogGame()">+ Log Game</button></div>`;
@@ -1630,7 +1581,6 @@ function paintOverview(){
   renderRoleChips();
   loadBannerBg();
 }
-// Alias so navigate('overview') and refreshAllPages() both work
 function renderOverview(){ paintOverview(); }
 
 function renderTopHerosMini(){
