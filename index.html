@@ -1417,13 +1417,11 @@ function navigate(pageId){
   if(t){t.classList.add('active');t.style.animation='none';requestAnimationFrame(()=>{t.style.animation=''});}
   document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page===pageId));
   document.getElementById('pageHeading').textContent=PAGE_LABELS[pageId]||pageId;
-  // Re-render whichever page we land on so it always shows fresh data
-  if(pageId==='overview')     renderOverview();
-  if(pageId==='champions')    { renderChampionPageStats(); renderHeroGrid(); }
-  if(pageId==='matches')      renderMatchHistory();
-  if(pageId==='performance')  renderPerformance();
-  if(pageId==='leaderboard')  renderLeaderboard();
-  // Settings: only populate the form if it's currently blank (avoid wiping user edits)
+  if(pageId==='overview')    renderOverview();
+  if(pageId==='champions')   { renderChampionPageStats(); renderHeroGrid(); }
+  if(pageId==='matches')     renderMatchHistory();
+  if(pageId==='performance') renderPerformance();
+  if(pageId==='leaderboard') renderLeaderboard();
   if(pageId==='settings'){
     const nameField = document.getElementById('set-name');
     if(!nameField || !nameField.value) renderSettings();
@@ -1571,11 +1569,34 @@ function applyBannerBg(banner, url){
 
 /* ══════════════════════════════════════════
    RENDER — OVERVIEW
-   All stats pulled directly from myMatches
+   Fetches data directly from Supabase — never depends on myMatches being pre-loaded
 ══════════════════════════════════════════ */
-function renderOverview(){
-  if(!currentProfile){ console.warn('renderOverview: no currentProfile yet'); return; }
-  console.log('renderOverview: myMatches.length =', myMatches.length);
+async function renderOverview(){
+  if(!currentUser) return;
+
+  // ── Fetch profile if missing ──
+  if(!currentProfile){
+    const {data, error} = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+    if(error || !data){ console.error('renderOverview: profile fetch failed', error); return; }
+    currentProfile = data;
+  }
+
+  // ── Always fetch fresh matches directly ──
+  const {data: freshMatches, error: matchErr} = await sb.from('matches')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', {ascending: true});
+
+  if(matchErr){
+    console.error('renderOverview: matches fetch failed', matchErr);
+    document.getElementById('ov-matches-list').innerHTML =
+      `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Could not load matches</div><div class="empty-sub">${matchErr.message}</div></div>`;
+    return;
+  }
+
+  // Keep global in sync
+  myMatches = freshMatches || [];
+  const matches = myMatches;
 
   // ── Profile section ──
   document.getElementById('ov-avatar').textContent = currentProfile.avatar || '⚡';
@@ -1584,44 +1605,40 @@ function renderOverview(){
   document.getElementById('ov-rank').textContent   = currentProfile.rank || 'Unranked';
   document.getElementById('ov-lp').textContent     = (currentProfile.lp||0) + ' pts';
 
-  // Start the live countdown (only starts interval once)
   startCountdown();
 
-  // ── Stats computed straight from myMatches ──
-  const total   = myMatches.length;
-  const wins    = myMatches.filter(m=>m.result==='win').length;
-  const losses  = total - wins;
-  const wr      = total ? Math.round((wins/total)*100) : null;
-  const totalK  = myMatches.reduce((s,m)=>s+(m.k||0),0);
-  const totalD  = myMatches.reduce((s,m)=>s+(m.d||0),0);
-  const totalA  = myMatches.reduce((s,m)=>s+(m.a||0),0);
-  const kda     = total ? (totalD===0 ? 'Perfect' : ((totalK+totalA)/totalD).toFixed(2)) : null;
-  const avgDmg  = total ? Math.round(myMatches.reduce((s,m)=>s+(m.dmg||0),0)/total) : null;
-  const avgDur  = total ? Math.round(myMatches.reduce((s,m)=>s+(m.dur||0),0)/total) : null;
+  // ── Compute stats from freshly fetched data ──
+  const total  = matches.length;
+  const wins   = matches.filter(m => m.result === 'win').length;
+  const losses = total - wins;
+  const wr     = total ? Math.round((wins / total) * 100) : null;
+  const totalK = matches.reduce((s,m) => s + (m.k||0), 0);
+  const totalD = matches.reduce((s,m) => s + (m.d||0), 0);
+  const totalA = matches.reduce((s,m) => s + (m.a||0), 0);
+  const kda    = total ? (totalD === 0 ? 'Perfect' : ((totalK + totalA) / totalD).toFixed(2)) : null;
+  const avgDmg = total ? Math.round(matches.reduce((s,m) => s + (m.dmg||0), 0) / total) : null;
+  const avgDur = total ? Math.round(matches.reduce((s,m) => s + (m.dur||0), 0) / total) : null;
 
-  // Current streak
-  const rev = [...myMatches].reverse();
+  const rev = [...matches].reverse();
   let streak = 0, streakType = '';
-  if(rev.length){ streakType = rev[0].result; for(const m of rev){ if(m.result===streakType) streak++; else break; } }
+  if(rev.length){ streakType = rev[0].result; for(const m of rev){ if(m.result === streakType) streak++; else break; } }
 
   // ── Stat strip ──
-  document.getElementById('ov-games').textContent   = total || '0';
-  document.getElementById('ov-wr').textContent      = wr !== null ? wr+'%' : '—';
-  document.getElementById('ov-wr').style.color      = wr === null ? 'var(--text)' : wr>=50 ? 'var(--win)' : 'var(--loss)';
-  document.getElementById('ov-kda').textContent     = kda || '—';
-  document.getElementById('ov-wins').textContent    = wins;
-  document.getElementById('ov-losses').textContent  = losses;
-  document.getElementById('ov-streak').textContent  = streak || '—';
-  document.getElementById('ov-streak').style.color  = streakType==='win' ? 'var(--win)' : streakType==='loss' ? 'var(--loss)' : 'var(--text)';
+  document.getElementById('ov-games').textContent  = total;
+  document.getElementById('ov-wr').textContent     = wr !== null ? wr + '%' : '—';
+  document.getElementById('ov-wr').style.color     = wr === null ? 'var(--text)' : wr >= 50 ? 'var(--win)' : 'var(--loss)';
+  document.getElementById('ov-kda').textContent    = kda || '—';
+  document.getElementById('ov-wins').textContent   = wins;
+  document.getElementById('ov-losses').textContent = losses;
+  document.getElementById('ov-streak').textContent = streak || '—';
+  document.getElementById('ov-streak').style.color = streakType==='win' ? 'var(--win)' : streakType==='loss' ? 'var(--loss)' : 'var(--text)';
   document.getElementById('ov-streak-lbl').textContent = streakType==='win' ? '🔥 Streak' : streakType==='loss' ? '❄️ Streak' : 'Streak';
-  document.getElementById('ov-dmg').textContent     = avgDmg ? (avgDmg>=1000?(avgDmg/1000).toFixed(1)+'k':avgDmg) : '—';
-  document.getElementById('ov-dur').textContent     = avgDur ? avgDur+'m' : '—';
+  document.getElementById('ov-dmg').textContent    = avgDmg ? (avgDmg >= 1000 ? (avgDmg/1000).toFixed(1)+'k' : avgDmg) : '—';
+  document.getElementById('ov-dur').textContent    = avgDur ? avgDur + 'm' : '—';
 
-  // ── Match count label ──
-  document.getElementById('ov-match-count').textContent = total + ' game' + (total!==1?'s':'');
-
-  // ── Recent matches (last 8, newest first) — same data as Match History ──
-  const recent = [...myMatches].reverse().slice(0, 8);
+  // ── Match count + recent list ──
+  document.getElementById('ov-match-count').textContent = total + ' game' + (total !== 1 ? 's' : '');
+  const recent = [...matches].reverse().slice(0, 8);
   document.getElementById('ov-matches-list').innerHTML = recent.length
     ? recent.map(matchHTML).join('')
     : `<div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">No games logged yet</div><div class="empty-sub">Click "+ Log Game" to add your first match</div><button class="btn btn-primary" onclick="openLogGame()">+ Log Game</button></div>`;
@@ -2091,8 +2108,8 @@ function showToast(msg,type=''){
   requestAnimationFrame(()=>t.classList.add('show'));
   setTimeout(()=>t.classList.remove('show'),3000);
 }
-function refreshAllPages(){
-  renderOverview();
+async function refreshAllPages(){
+  await renderOverview();
   renderChampionPageStats();
   renderMatchHistory();
   renderPerformance();
